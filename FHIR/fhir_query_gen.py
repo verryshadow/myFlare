@@ -5,8 +5,8 @@ fhir_format = "_format=application/fhir+xml"
 
 
 def generate_fhir_cnf(i2b2_query: List[List[dict]]) -> List[List[str]]:
-    dnf = [generate_fhir_disjunction(i2b2_panel) for i2b2_panel in i2b2_query]
-    return dnf
+    cnf = [generate_fhir_disjunction(i2b2_panel) for i2b2_panel in i2b2_query]
+    return cnf
 
 
 def get_param(item: dict) -> str:
