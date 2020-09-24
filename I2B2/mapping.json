@@ -1,0 +1,61 @@
+{
+  "\\\\i2b2_DEMO\\i2b2\\Demographics\\Gender\\": [
+    {
+      "res": "Patient",
+      "param": "gender",
+      "sys": "",
+      "code": "male"
+    },
+    {
+      "res": "Patient",
+      "param": "gender",
+      "sys": "",
+      "code": "female"
+    },
+    {
+      "res": "Patient",
+      "param": "gender",
+      "sys": "",
+      "code": "unknown"
+    }
+  ],
+  "\\\\i2b2_DEMO\\i2b2\\Demographics\\Gender\\Male\\": [
+    {
+      "res": "Patient",
+      "param": "gender",
+      "sys": "",
+      "code": "male"
+    }
+  ],
+  "\\\\i2b2_142ac68b\\i2b2\\dzl:Measurement\\S:23426006\\S:252478000\\L:64098-7\\": [
+    {
+      "res": "Observation",
+      "param": "code",
+      "sys": "http://loinc.org/",
+      "code": "64098-7",
+      "valueParam": "value-quantity"
+    }
+  ],
+  "\\\\i2b2_DEMO\\i2b2\\Demographics\\deceased\\": [
+    {
+      "res": "Patient",
+      "param": "deceased",
+      "sys": "",
+      "code": "true"
+    },
+    {
+      "res": "Patient",
+      "param": "deceased-date:missing",
+      "sys": "",
+      "code": "false"
+    }
+  ],
+  "\\\\i2b2_DEMO\\i2b2\\Demographics\\alive\\": [
+    {
+      "res": "Patient",
+      "param": "deceased-date:missing",
+      "sys": "",
+      "code": "true"
+    }
+  ]
+}
