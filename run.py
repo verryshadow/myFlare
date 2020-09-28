@@ -32,4 +32,5 @@ for fhir_disjunction_response in fhir_cnf_responses:
     fhir_query_results.append(fhir_cnf_results)
 
 result_set = build_result_set_from_query_results(fhir_query_results)
+print(len(result_set))
 print(result_set)
