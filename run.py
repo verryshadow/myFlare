@@ -5,12 +5,12 @@ from FHIR.fhir_query_gen import generate_fhir_cnf
 from I2B2.i2b2_parser import parse_i2b2_query_xml_string
 import xml.etree.ElementTree as ET
 
-with open('I2B2/i2b2_example.xml', 'r') as file:
+with open('I2B2/i2b2_demo.xml', 'r') as file:
     parsed_i2b2 = parse_i2b2_query_xml_string(file.read())
-    print(parsed_i2b2)
+    print(f"Parsed i2b2:\n {parsed_i2b2}\n")
 
 fhir_cnf = generate_fhir_cnf(parsed_i2b2)
-print(fhir_cnf)
+print(f"fhir_cnf:\n {fhir_cnf}\n")
 
 fhir_cnf_responses = [execute_queries(fhir_disjunction) for fhir_disjunction in fhir_cnf]
 
@@ -22,15 +22,17 @@ for fhir_disjunction_response in fhir_cnf_responses:
             out.write(ET.tostring(fhir_response).decode('utf-8'))
         count += 1
 
+print("\n\n")
+print("Query results")
 fhir_query_results = []
 for fhir_disjunction_response in fhir_cnf_responses:
     fhir_cnf_results = []
     for fhir_response in fhir_disjunction_response:
         patient_ids = get_patient_ids_from_bundle(fhir_response)
-        print(patient_ids)
+        print(f"patient_ids: {patient_ids}")
         fhir_cnf_results.append(patient_ids)
     fhir_query_results.append(fhir_cnf_results)
 
 result_set = build_result_set_from_query_results(fhir_query_results)
-print(len(result_set))
-print(result_set)
+print(f"result_set_size:\n{len(result_set)}")
+print(f"result_set:\n{result_set}")
