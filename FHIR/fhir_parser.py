@@ -52,8 +52,9 @@ def _extract_ids_from_patient(patient: ET.Element) -> str:
 
 
 def _extract_ids_from_observation(observation: ET.Element) -> str:
-    # TODO
-    pass
+    x_identifier = observation.find(".ns0:subject/ns0:identifier", _ns)
+    x_identifier_value = x_identifier.find("./ns0:value", _ns)
+    return x_identifier_value.attrib["value"]
 
 
 def _extract_ids_from_encounter(encounter: ET.Element) -> str:
