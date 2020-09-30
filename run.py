@@ -4,15 +4,22 @@ from FHIR.fhir_parser import get_patient_ids_from_bundle, build_result_set_from_
 from FHIR.fhir_query_gen import generate_fhir_cnf
 from I2B2.i2b2_parser import parse_i2b2_query_xml_string
 import xml.etree.ElementTree as ET
+import timeit
 
+start_time = timeit.default_timer()
 with open('I2B2/i2b2_demo.xml', 'r') as file:
     parsed_i2b2 = parse_i2b2_query_xml_string(file.read())
     print(f"Parsed i2b2:\n {parsed_i2b2}\n")
 
 fhir_cnf = generate_fhir_cnf(parsed_i2b2)
-print(f"fhir_cnf:\n {fhir_cnf}\n")
+print(f"generated FHIR_cnf:\n {fhir_cnf}\n")
+elapsed = timeit.default_timer() - start_time
+print(f"Took {elapsed} seconds to evaluate i2b2 and generate FHIR queries")
 
+start_time = timeit.default_timer()
 fhir_cnf_responses = [execute_queries(fhir_disjunction) for fhir_disjunction in fhir_cnf]
+elapsed = timeit.default_timer() - start_time
+print(f"Took {elapsed} seconds to execute fhir queries")
 
 # Write to file for debugging purposes
 count = 0
@@ -37,6 +44,7 @@ for fhir_disjunction_response in fhir_cnf_responses:
             print("or")
         print(f"{get_patient_ids_from_bundle(fhir_response)}")
 
+start_time = timeit.default_timer()
 fhir_query_results = []
 for fhir_disjunction_response in fhir_cnf_responses:
     fhir_cnf_results = []
@@ -44,7 +52,9 @@ for fhir_disjunction_response in fhir_cnf_responses:
         patient_ids = get_patient_ids_from_bundle(fhir_response)
         fhir_cnf_results.append(patient_ids)
     fhir_query_results.append(fhir_cnf_results)
-
 result_set = build_result_set_from_query_results(fhir_query_results)
+elapsed = timeit.default_timer() - start_time
+print(f"Took {elapsed} seconds to analyse responses and build result_set")
+
 print(f"\nresult_set_size:\n{len(result_set)}")
 print(f"result_set:\n{result_set}")
