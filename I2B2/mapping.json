@@ -57,5 +57,41 @@
       "sys": "",
       "code": "true"
     }
+  ],
+  "\\\\i2b2_DIAG\\i2b2\\Measurements\\Lymphozyten\\": [
+    {
+      "res": "Observation",
+      "param": "code",
+      "sys": "",
+      "code": "I_COVAS_COV_M030_LAB_PARA_Q040",
+      "valueParam": "value-quantity"
+    }
+  ],
+  "\\\\i2b2_DIAG\\i2b2\\Measurements\\Lymphozyten_absolut\\": [
+    {
+      "res": "Observation",
+      "param": "code",
+      "sys": "",
+      "code": "I_COVAS_COV_M030_LAB_PARA_Q050",
+      "valueParam": "value-quantity"
+    }
+  ],
+  "\\\\i2b2_DIAG\\i2b2\\Measurements\\Bilirubin\\": [
+    {
+      "res": "Observation",
+      "param": "code",
+      "sys": "",
+      "code": "I_COVAS_COV_M030_LAB_PARA_Q190",
+      "valueParam": "value-quantity"
+    }
+  ],
+  "\\\\i2b2_DIAG\\i2b2\\Measurements\\Bilirubin_direkt\\": [
+    {
+      "res": "Observation",
+      "param": "code",
+      "sys": "",
+      "code": "I_COVAS_COV_M030_LAB_PARA_Q200",
+      "valueParam": "value-quantity"
+    }
   ]
 }

@@ -7,7 +7,7 @@ from requests.auth import HTTPBasicAuth
 import urllib3
 urllib3.disable_warnings()
 
-
+# TODO: Create parallel requests with user config, maybe slower?
 def execute_queries(queries: List[str]) -> List[ET.Element]:
     ret = []
     for query in queries:
