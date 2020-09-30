@@ -26,11 +26,13 @@ def build_intersections(fhir_query_ids_a: List[str], fhir_query_ids_b: List[str]
 
 
 def build_result_set_from_query_results(fhir_query_results: List[List[List[str]]]) -> List[str]:
-    results = []
+    results = None
     for fhir_cnf_results in fhir_query_results:
         unions = []
         for fhir_disjunction_results in fhir_cnf_results:
             unions = build_unions(unions, fhir_disjunction_results)
+        if results is None:
+            results = unions
         results = build_intersections(results, unions)
     return results
 
