@@ -22,17 +22,29 @@ for fhir_disjunction_response in fhir_cnf_responses:
             out.write(ET.tostring(fhir_response).decode('utf-8'))
         count += 1
 
-print("\n\n")
 print("Query results")
+first_outer = True
+for fhir_disjunction_response in fhir_cnf_responses:
+    if first_outer:
+        first_outer = False
+    else:
+        print("and")
+    first_inner = True
+    for fhir_response in fhir_disjunction_response:
+        if first_inner:
+            first_inner = False
+        else:
+            print("or")
+        print(f"{get_patient_ids_from_bundle(fhir_response)}")
+
 fhir_query_results = []
 for fhir_disjunction_response in fhir_cnf_responses:
     fhir_cnf_results = []
     for fhir_response in fhir_disjunction_response:
         patient_ids = get_patient_ids_from_bundle(fhir_response)
-        print(f"patient_ids: {patient_ids}")
         fhir_cnf_results.append(patient_ids)
     fhir_query_results.append(fhir_cnf_results)
 
 result_set = build_result_set_from_query_results(fhir_query_results)
-print(f"result_set_size:\n{len(result_set)}")
+print(f"\nresult_set_size:\n{len(result_set)}")
 print(f"result_set:\n{result_set}")
