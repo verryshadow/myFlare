@@ -10,7 +10,7 @@ import timeit
 __debug = False
 
 
-def run(i2b2_query_definition: str) -> List[str]:
+def run(i2b2_query_definition: str, xml=False):
     start_time = timeit.default_timer()
     parsed_i2b2 = parse_i2b2_query_xml_string(i2b2_query_definition)
     print(f"Parsed i2b2:\n {parsed_i2b2}\n")
@@ -62,7 +62,14 @@ def run(i2b2_query_definition: str) -> List[str]:
 
     print(f"\nresult_set_size:\n{len(result_set)}")
     print(f"result_set:\n{result_set}")
-    return result_set
+    if xml:
+        x_result_set = ET.Element("resultSet")
+        for result in result_set:
+            x_result = ET.Element("result")
+            x_result.attrib["value"] = result
+            x_result_set.insert(0, x_result)
+        result_set = x_result_set
+    return ET.tostring(result_set).decode("UTF-8")
 
 
 if __name__ == "__main__":
