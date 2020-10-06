@@ -7,7 +7,7 @@ from FHIR.fhir_query_gen import generate_fhir_cnf
 from I2B2.i2b2_parser import parse_i2b2_query_xml_string
 import xml.etree.ElementTree as ET
 import timeit
-__debug = False
+__debug = True
 
 
 def run(i2b2_query_definition: str, xml=False):

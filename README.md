@@ -84,7 +84,7 @@ The Flask server receives a POST request to `http://localhost:5000/i2b2` with a 
             <invert>0</invert>
             <panel_timing>ANY</panel_timing>
             <total_item_occurrences>1</total_item_occurrences>
-                        <item>
+            <item>
                 <hlevel>2</hlevel>
                 <item_key>\\i2b2_DIAG\i2b2\Measurements\Bilirubin\</item_key>
                 <item_name>Bilirubin (gesamt)</item_name>
@@ -162,3 +162,104 @@ Each item_key is then looked up in a userdefined mapping given in the ``I2B2/map
 ]
 ```
 </details>
+
+This step leaves us with this data structure: ```List[List[List[Dict]]]```
+
+<details>
+    <summary>Our Example would look like this:</summary>
+
+```json
+[
+  [
+    {
+      "res": "Patient",
+      "param": "gender",
+      "sys": "",
+      "code": "male"
+    }
+  ],
+  [
+    {
+      "res": "Observation",
+      "param": "code",
+      "sys": "",
+      "code": "I_COVAS_COV_M030_LAB_PARA_Q040",
+      "valueParam": "value-quantity",
+      "constrain_by_value": {
+        "value_type": "NUMBER",
+        "value_operator": "LT",
+        "value_constraint": "40",
+        "value_unit_of_measure": "%"
+      }
+    },
+    {
+      "res": "Observation",
+      "param": "code",
+      "sys": "",
+      "code": "I_COVAS_COV_M030_LAB_PARA_Q050",
+      "valueParam": "value-quantity",
+      "constrain_by_value": {
+        "value_type": "NUMBER",
+        "value_operator": "LT",
+        "value_constraint": "3",
+        "value_unit_of_measure": "/nl"
+      }
+    }
+  ],
+  [
+    {
+      "res": "Observation",
+      "param": "code",
+      "sys": "",
+      "code": "I_COVAS_COV_M030_LAB_PARA_Q190",
+      "valueParam": "value-quantity",
+      "constrain_by_value": {
+        "value_type": "NUMBER",
+        "value_operator": "LT",
+        "value_constraint": "8",
+        "value_unit_of_measure": "mg/dl"
+      }
+    },
+    {
+      "res": "Observation",
+      "param": "code",
+      "sys": "",
+      "code": "I_COVAS_COV_M030_LAB_PARA_Q200",
+      "valueParam": "value-quantity",
+      "constrain_by_value": {
+        "value_type": "NUMBER",
+        "value_operator": "LT",
+        "value_constraint": "6",
+        "value_unit_of_measure": "mg/dl"
+      }
+    }
+  ]
+]
+```
+</details>
+
+### Building the FHIR-Queries
+In the next step, for each item of every panel a FHIR Query is generated
+
+<details>
+    <summary>forming the executable CNF</summary>
+    
+```json
+[
+  [
+    "https://server_address/fhir-server/api/v4/Patient?gender=male&_format=application/fhir+xml"
+  ],
+  [
+    "https://server_address/fhir-server/api/v4/Observation?code=I_COVAS_COV_M030_LAB_PARA_Q040&value-quantity=lt40&_format=application/fhir+xml",
+    "https://server_address/fhir-server/api/v4/Observation?code=I_COVAS_COV_M030_LAB_PARA_Q050&value-quantity=lt3&_format=application/fhir+xml"
+  ],
+  [
+    "https://server_address/fhir-server/api/v4/Observation?code=I_COVAS_COV_M030_LAB_PARA_Q190&value-quantity=lt8&_format=application/fhir+xml",
+    "https://server_address/fhir-server/api/v4/Observation?code=I_COVAS_COV_M030_LAB_PARA_Q200&value-quantity=lt6&_format=application/fhir+xml"
+  ]
+]
+```
+</details>
+
+### Executing the FHIR-Queries
+The generated FHIR-Queries from above are then executed one by one, the resulting Bundle is 
