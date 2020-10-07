@@ -1,6 +1,3 @@
-# parse xml file
-from typing import List
-
 from FHIR.fhir_executor import execute_queries
 from FHIR.fhir_parser import get_patient_ids_from_bundle, build_result_set_from_query_results
 from FHIR.fhir_query_gen import generate_fhir_cnf
@@ -69,7 +66,7 @@ def run(i2b2_query_definition: str, xml=False):
             x_result.attrib["value"] = result
             x_result_set.insert(0, x_result)
         result_set = x_result_set
-    return ET.tostring(result_set).decode("UTF-8")
+    return result_set
 
 
 if __name__ == "__main__":
