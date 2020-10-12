@@ -3,7 +3,7 @@
 A tool to execute i2b2 requests in FHIR
 
 ## Goal
-the goal of this project is to provide an API that allows execution of i2b2 queries on a FHIR-server
+the goal of this project is to provide an API that allows for execution of i2b2 queries on a FHIR-server
 
 ## Getting started
 to start the server you first need to setup the python environment:
@@ -16,7 +16,7 @@ flask run_flask.py
 ### Input
 The Flask server receives a POST request to `http://localhost:5000/i2b2` with a body containing the i2b2 request.
 <details>
-    <summary>The request would look like this</summary>
+    <summary>Request</summary>
     
 ```xml
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -129,9 +129,9 @@ The Flask server receives a POST request to `http://localhost:5000/i2b2` with a 
 ### Parsing the i2b2
 In the first step the algorithm proceeds to extract the item_keys and constrains. 
 
-For every Panel a list is created, into which a dictionary for every item from the given panel is inserted.
+For every Panel a list is created, into which a dictionary for each item from the given panel is inserted.
 
-Each dictionary contains the item key and if given value constrains.
+Every dictionary contains the item key and if given value constrains.
 
 ### Mapping the i2b2 keys
 Each item_key is then looked up in a user-defined mapping given in the ``I2B2/mapping.json`` where a list of 
