@@ -1,0 +1,22 @@
+
+
+REAMDE.md anpassen, dass die Anleitung von einem Anfänger befolgt werden kann.
+Z.B: Beispiele: curl -X POST --data @I2B2/i2b2_demo.xml -H "Content-Type: application/xml" http://localhost:5000/i2b2
+
+Anleitung wie man einen FHIR-Server startet und mit beispieldaten befüllt.
+ curl 'https://raw.githubusercontent.com/FirelyTeam/spark/r4/master/.docker/docker-compose.example.yml' > docker-compose.yml
+ 
+
+
+docker run -p9443:9443 ibmcom/ibm-fhir-server
+
+Wenn `Content-Type: application/xml` nicht mitgeschickt wird, dann gibt es 500 und exception im log. Das sollte angepasst werden, so dass 415 zurück kommt und warning message im log.
+
+
+Sinnvolle Fehlermeldung, wenn FHIR server nicht läuft. Derzeit kommt 500 und exception im log. Es sollte stattdessen 504 geliefert werden und error message im log.
+
+
+import.py und Testdaden sollten in dieses repo
+
+
+
