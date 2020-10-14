@@ -1,6 +1,6 @@
 from typing import List
 
-server_base_url = "http://localhost:5555/fhir/"
+server_base_url = "http://localhost:5555/fhir"
 fhir_format = "_format=application/fhir+xml"
 
 

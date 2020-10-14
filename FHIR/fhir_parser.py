@@ -25,12 +25,15 @@ def build_intersections(fhir_query_ids_a: List[str], fhir_query_ids_b: List[str]
     return list(set(fhir_query_ids_a).intersection(set(fhir_query_ids_b)))
 
 
-def build_result_set_from_query_results(fhir_query_results: List[List[List[str]]]) -> List[str]:
+def build_result_set_from_query_results(fhir_query_results: List[List[List[List[str]]]]) -> List[str]:
     results = None
     for fhir_cnf_results in fhir_query_results:
         unions = []
         for fhir_disjunction_results in fhir_cnf_results:
-            unions = build_unions(unions, fhir_disjunction_results)
+            page_union = []
+            for fhir_page in fhir_disjunction_results:
+                page_union = build_unions(page_union, fhir_page)
+            unions = build_unions(unions, page_union)
         if results is None:
             results = unions
         results = build_intersections(results, unions)
@@ -48,9 +51,15 @@ def _get_resource_type(resource):
 
 
 def _extract_ids_from_patient(patient: ET.Element) -> str:
-    x_identifier = patient.find("./ns0:identifier", _ns)
-    x_identifier_value = x_identifier.find("./ns0:value", _ns)
-    return x_identifier_value.attrib["value"]
+    x_id = patient.find("./ns0:id", _ns)
+
+    if x_id is None:
+        x_identifier = patient.find("./ns0:identifier", _ns)
+        x_identifier_value = x_identifier.find("./ns0:value", _ns)
+        iD = x_identifier_value.attrib["value"]
+    else:
+        iD = x_id.attrib["value"]
+    return iD
 
 
 def _extract_ids_from_observation(observation: ET.Element) -> str:
