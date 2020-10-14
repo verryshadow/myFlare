@@ -8,8 +8,8 @@ app = Flask(__name__)
 
 def build_response(result_set, i2b2_request):
     x_result_set = ET.Element("resultSet")
-    x_result = ET.Element("result")
-    x_result.attrib["value"] = len(result_set)
+    x_result = ET.Element("patient_count")
+    x_result.attrib["value"] = str(len(result_set))
     x_result_set.insert(0, x_result)
     return x_result_set
 

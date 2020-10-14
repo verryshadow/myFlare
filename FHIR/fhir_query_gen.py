@@ -1,8 +1,6 @@
 from typing import List
 
-# server_base_url = "https://localhost:9443/fhir-server/api/v4"
-server_base_url = "http://spark.kufu.no/fhir"
-
+server_base_url = "http://localhost:5555/fhir/"
 fhir_format = "_format=application/fhir+xml"
 
 
