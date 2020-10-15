@@ -14,11 +14,11 @@ def execute_query(query: str) -> List[ET.Element]:
     _ns = {"ns0": "http://hl7.org/fhir"}
     queries = [query]
     for query in queries:
-        print(f"Query:{query}")
+       # print(f"Query:{query}")
         response = requests.get(query, verify=False) #, auth=HTTPBasicAuth('fhiruser', 'change-password'))
         if response.status_code != 200:
             continue
-        print(f"Respone: {response.text}")
+       # print(f"Respone: {response.text}")
         x_response = ET.fromstring(response.text)
         x_next = x_response.find("./ns0:link/ns0:relation[@value='next']/../ns0:url", _ns)
         if x_next is not None:
