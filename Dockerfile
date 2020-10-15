@@ -1,20 +1,16 @@
 # first stage
-FROM python:3.8 AS builder
+FROM python:3.8
 COPY requirements.txt .
 
+ENV PATH=/root/.local:/root/.local/bin:$PATH
+
 # install dependencies to the local user directory (eg. /root/.local)
-RUN pip install --user -r requirements.txt
+RUN pip3 install --user -r requirements.txt
 
-# second unnamed stage
-FROM python:3.8-slim
-WORKDIR /code
-
-# copy only the dependencies installation from the 1st stage image
-COPY --from=builder /root/.local/bin /root/.local
+# TODO multistage dockerfile, see https://www.docker.com/blog/containerized-python-development-part-1/
 COPY ./src .
 
 # update PATH environment variable
-ENV PATH=/root/.local:$PATH
 ENV FLASK_APP=run_flask.py
 
-CMD [ "flask", "run" ]
+CMD [ "flask", "run", "--host=0.0.0.0"]
