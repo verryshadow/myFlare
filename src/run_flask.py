@@ -1,4 +1,5 @@
 import time
+from requests.exceptions import RequestException
 from flask import Flask, request
 import xml.etree.ElementTree as ET
 from run import run
@@ -25,8 +26,12 @@ def handle_i2b2_query():
     start_time = time.time()
     i2b2_request = request.data.decode("UTF-8")
     i2b2_query = request.data.decode("UTF-8")
-    result_set = run(i2b2_query)
-    response = build_response(result_set, i2b2_request)
+    try:
+        result_set = run(i2b2_query)
+        response = build_response(result_set, i2b2_request)
+    except RequestException as e:
+        return "Connection error with upstream FHIR server", 504
+        
     end_time = time.time()
     delta = end_time - start_time
 
