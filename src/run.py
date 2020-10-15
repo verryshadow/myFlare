@@ -1,7 +1,7 @@
-from FHIR.fhir_executor import execute_query
-from FHIR.fhir_parser import get_patient_ids_from_bundle, build_result_set_from_query_results
-from FHIR.fhir_query_gen import generate_fhir_cnf
-from I2B2.i2b2_parser import parse_i2b2_query_xml_string
+from fhir.fhir_executor import execute_query
+from fhir.fhir_parser import get_patient_ids_from_bundle, build_result_set_from_query_results
+from fhir.fhir_query_gen import generate_fhir_cnf
+from i2b2.i2b2_parser import parse_i2b2_query_xml_string
 import timeit
 
 __debug = True
