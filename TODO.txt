@@ -5,7 +5,8 @@ Z.B: Beispiele: curl -X POST --data @I2B2/i2b2_demo.xml -H "Content-Type: applic
 
 Anleitung wie man einen FHIR-Server startet und mit beispieldaten befüllt.
  curl 'https://raw.githubusercontent.com/FirelyTeam/spark/r4/master/.docker/docker-compose.example.yml' > docker-compose.yml
- 
+ docker-compose up
+
 
 
 docker run -p9443:9443 ibmcom/ibm-fhir-server
