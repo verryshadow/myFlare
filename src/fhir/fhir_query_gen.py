@@ -1,6 +1,7 @@
+import os
 from typing import List
 
-server_base_url = "http://localhost:5555/fhir"
+server_base_url = os.environ.get("FHIR_BASE_URL") or "http://localhost:5555/fhir"
 fhir_format = "_format=application/fhir+xml"
 
 
