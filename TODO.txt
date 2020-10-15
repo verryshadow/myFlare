@@ -8,8 +8,16 @@ Anleitung wie man einen FHIR-Server startet und mit beispieldaten befüllt.
  docker-compose up
 
 
+Endpoint des FHIR-Servers auslagern in Umgebungsvariable. z.B. FHIR_BASE=http://localhost:5555/fhir
 
+Dockerisierung von Flask/Python:
+https://www.docker.com/blog/containerized-python-development-part-1/
+
+
+Anleitung wie man die FHIR-SErver startet:
 docker run -p9443:9443 ibmcom/ibm-fhir-server
+
+
 
 Wenn `Content-Type: application/xml` nicht mitgeschickt wird, dann gibt es 500 und exception im log. Das sollte angepasst werden, so dass 415 zurück kommt und warning message im log.
 
