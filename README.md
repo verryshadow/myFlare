@@ -11,7 +11,8 @@ Example for bash (e.g. git-bash in Windows)
 ```bash
 pip install -r requirements.txt
 
-FLASK_APP=run_flask.py flask run
+FHIR_BASE_URL=http://localhost:5555/fhir FLASK_APP=run_flask.py flask run
+
 ```
 When the server is running, you can run i2b2 queries by posting the query_definition XML to `http://localhost:5000/i2b2`.
 E.g.
