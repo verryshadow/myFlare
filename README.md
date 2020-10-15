@@ -16,7 +16,7 @@ FLASK_APP=run_flask.py flask run
 When the server is running, you can run i2b2 queries by posting the query_definition XML to `http://localhost:5000/i2b2`.
 E.g.
 ```bash
-curl -X POST --data @I2B2/i2b2_demo.xml -H "Content-Type: application/xml" http://localhost:5000/i2b2
+curl -X POST --data @i2b2/i2b2_demo.xml -H "Content-Type: application/xml" http://localhost:5000/i2b2
 ```
 
 

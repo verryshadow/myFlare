@@ -1,7 +1,7 @@
 from typing import List
 
 import xml.etree.ElementTree as ET
-from FHIR.fhir_query_gen import fhir_format
+from fhir.fhir_query_gen import fhir_format
 
 import requests
 from requests.auth import HTTPBasicAuth
