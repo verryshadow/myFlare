@@ -1,5 +1,5 @@
 {
-  "\\\\i2b2_DEMO\\i2b2\\Demographics\\Gender\\": [
+  "/pat/gender": [
     {
       "res": "Patient",
       "param": "gender",
@@ -19,12 +19,28 @@
       "code": "unknown"
     }
   ],
-  "\\\\i2b2_DEMO\\i2b2\\Demographics\\Gender\\Male\\": [
+  "/pat/gender/male": [
     {
       "res": "Patient",
       "param": "gender",
       "sys": "",
       "code": "male"
+    }
+  ],
+  "/pat/gender/female": [
+    {
+      "res": "Patient",
+      "param": "gender",
+      "sys": "",
+      "code": "female"
+    }
+  ],
+  "/pat/gender/unknown": [
+    {
+      "res": "Patient",
+      "param": "gender",
+      "sys": "",
+      "code": "unknown"
     }
   ],
   "\\\\i2b2_142ac68b\\i2b2\\dzl:Measurement\\S:23426006\\S:252478000\\L:64098-7\\": [
