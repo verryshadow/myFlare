@@ -16,7 +16,7 @@ https://www.docker.com/blog/containerized-python-development-part-1/
 
 Anleitung wie man die FHIR-SErver startet:
 docker run -p9443:9443 ibmcom/ibm-fhir-server
-
+Im Docker compose den FHIR server mit starten
 
 
 Wenn `Content-Type: application/xml` nicht mitgeschickt wird, dann gibt es 500 und exception im log. Das sollte angepasst werden, so dass 415 zurück kommt und warning message im log.
@@ -28,4 +28,6 @@ Sinnvolle Fehlermeldung, wenn FHIR server nicht läuft. Derzeit kommt 500 und exc
 import.py und Testdaden sollten in dieses repo
 
 
+Integrationtests
 
+Asynchronity

@@ -2,7 +2,7 @@ import requests
 import urllib3
 from requests import ConnectionError
 from requests.auth import HTTPBasicAuth
-from common import endpoints, get_temp_file_path
+from IBM_transfer.common import endpoints, get_temp_file_path
 
 urllib3.disable_warnings()
 target_server_base_url = "http://localhost:5555/fhir/"
