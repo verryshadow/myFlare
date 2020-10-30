@@ -49,6 +49,7 @@ def instruction_decoder_object_hook(o: dict) -> Instruction:
 
     request_data = o["request_data"]
     queue_time = o["queue_time"] if "queue_time" in o else time.time_ns()
+    # TODO: parse into UUID datatype
     request_id = o["request_id"] if "request_id" in o else -1
     # Todo: check if o.execution_state is valid
     print("called")

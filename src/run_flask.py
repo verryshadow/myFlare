@@ -27,7 +27,18 @@ def handle_i2b2_query():
     # Queue for execution
     instruction_queue.put(instruction)
 
-    return "queued", 200
+    return f"/query/{str(instruction.request_id)}/status", 200
+
+
+def get_state(query_id) -> str:
+    pass
+
+
+@app.route("/query/<query_id>/status", methods=["GET"])
+def handle_result_query(query_id: str):
+    state = get_state(query_id)
+    if state is None:
+        return "No Query under this id", 404
 
 
 worker = Worker(instruction_queue)
