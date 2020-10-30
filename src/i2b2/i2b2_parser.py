@@ -11,13 +11,12 @@ def lookup(item_key: str) -> List[dict]:
         return config[item_key]
     except KeyError as e:
         if item_key.startswith("/meas/"):
-             # assume measurement, assume last part is code
-             code = item_key[item_key.rindex("/")+1:]
-             return [{ "res": "Observation","param": "code","sys": "","code": code,"valueParam": "value-quantity"}]
+            # assume measurement, assume last part is code
+            code = item_key[item_key.rindex("/") + 1:]
+            return [{"res": "Observation", "param": "code", "sys": "", "code": code, "valueParam": "value-quantity"}]
         else:
-             return []
+            return []
         # TODO: Properly handle errors
-        
 
 
 def parse_i2b2_query_xml_string(xml: str) -> List[List[dict]]:

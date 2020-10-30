@@ -1,53 +1,35 @@
 import time
-from requests.exceptions import RequestException
+from queue import Queue
+
 from flask import Flask, request
-import xml.etree.ElementTree as ET
-from run import run
+from uuid import uuid4, UUID
+
+from worker import instruction_encoder
+from worker.instruction import Instruction
+from worker.worker import Worker
 
 app = Flask(__name__)
+instruction_queue: 'Queue[Instruction]' = Queue()
 
 
-def build_response(result_set, i2b2_request):
-    x_result_set = ET.Element("resultSet")
-    x_result = ET.Element("patient_count")
-    x_result.attrib["value"] = str(len(result_set))
-    x_result_set.insert(0, x_result)
-    return x_result_set
-
-#    for result in result_set:
-#       x_result = ET.Element("result")
-#       x_result.attrib["value"] = result
-#       x_result_set.insert(0, x_result)
-
-
-@app.route("/i2b2", methods=["POST"])
+@app.route("/query", methods=["POST"])
 def handle_i2b2_query():
-    # Execute and timestamp
-    start_time = time.time()
-    i2b2_request = request.data.decode("UTF-8")
-    i2b2_query = request.data.decode("UTF-8")
-    try:
-        result_set = run(i2b2_query)
-        response = build_response(result_set, i2b2_request)
-    except RequestException as e:
-        return "Connection error with upstream FHIR server", 504
-        
-    end_time = time.time()
-    delta = end_time - start_time
+    # Create Instruction
+    queue_insertion_time: int = time.time_ns()
+    i2b2_request: str = request.data.decode("UTF-8")
+    uuid: UUID = uuid4()
+    instruction: Instruction = Instruction(i2b2_request, uuid, queue_insertion_time)
 
-    # Insert timestamps into result_set
-    x_start_time = ET.Element("start_time")
-    x_start_time.attrib["value"] = str(start_time)
+    # Create execution flag
+    with open(instruction.file_path(), "x") as flag:
+        flag.write(instruction_encoder.encode(instruction))
 
-    x_end_time = ET.Element("end_time")
-    x_end_time.attrib["value"] = str(end_time)
+    # Queue for execution
+    instruction_queue.put(instruction)
 
-    x_delta = ET.Element("delta")
-    x_delta.attrib["value"] = str(delta)
+    return "queued", 200
 
-    response.insert(0, x_end_time)
-    response.insert(0, x_start_time)
-    response.insert(0, x_delta)
-    response = ET.tostring(response).decode("UTF-8")
 
-    return str(response)
+worker = Worker(instruction_queue)
+worker.start()
+app.run("localhost", 5000)

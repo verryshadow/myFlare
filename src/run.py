@@ -1,3 +1,5 @@
+from typing import List
+
 from fhir.fhir_executor import execute_query
 from fhir.fhir_parser import get_patient_ids_from_bundle, build_result_set_from_query_results
 from fhir.fhir_query_gen import generate_fhir_cnf
@@ -7,7 +9,7 @@ import timeit
 __debug = True
 
 
-def run(i2b2_query_definition: str):
+def run(i2b2_query_definition: str) -> List[str]:
     start_time = timeit.default_timer()
     parsed_i2b2 = parse_i2b2_query_xml_string(i2b2_query_definition)
     print(f"Parsed i2b2:\n {parsed_i2b2}\n")
