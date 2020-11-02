@@ -5,3 +5,4 @@ __pycache__/
 src/worker/requests/
 virtenv/Include/
 virtenv/**
+FHIR/fhir_responses/
