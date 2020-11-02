@@ -25,35 +25,65 @@ def build_response(result_set: List[str]) -> ET.Element:
 
 
 class Worker(Thread):
+    """
+    Thread that processes instructions passed to it through a shared queue
+    """
     def __init__(self, q: 'Queue[Instruction]'):
+        """
+        :param q: means of communicating with the thread, Instructions put in the queue will be processed by the worker
+        """
         self.q: Queue[Instruction] = q
+        """
+        Queue connecting the worker thread to the main thread
+        """
         self.instruction: Instruction = None
-        self.start_time: int = 0
+        """
+        Instruction currently processed by the thread
+        """
         super().__init__()
 
     def run(self):
         while True:
+            # Wait for main thread to add instruction to queue
             self.instruction = self.q.get(block=True, timeout=None)
-            self.start_time = time.time_ns()
+
+            # Setup instruction to process
+            self.instruction.processing_start_time = time.time_ns()
             self.instruction.state = ExecutionState.Executing
+
+            # Process instruction
             self.handle()
 
     def handle(self):
+        """
+        Processes the current instruction and persists the result
+        """
         try:
+            # process instruction and build response
             result_set: List[str] = process_request(self.instruction.request_data)
             x_response = build_response(result_set)
             self.insert_timestamps(x_response)
-            self.persist_response(x_response)
+            response = ET.tostring(x_response).decode("UTF-8")
+
+            # Add response to instruction and persist instruction as done
+            self.instruction.response = response
+            self.instruction.state = ExecutionState.Done
+            self.persist_instruction()
 
         except RequestException as e:
             return "Connection error with upstream FHIR server", 504
 
     def insert_timestamps(self, x_response):
+        """
+        Inserts start_time, queue_time, end_time and delta tags into the xml response
+        :param x_response: existing response to add the timestamps to
+        """
         end_time = time.time()
-        delta = end_time - self.start_time
+        delta = end_time - self.instruction.processing_start_time
 
+        # Create timestamp tags
         x_start_time = ET.Element("start_time")
-        x_start_time.attrib["value"] = str(self.start_time)
+        x_start_time.attrib["value"] = str(self.instruction.processing_start_time)
 
         x_queue_time = ET.Element("queue_time")
         x_queue_time.attrib["value"] = str(self.instruction.queue_time)
@@ -64,14 +94,15 @@ class Worker(Thread):
         x_delta = ET.Element("delta")
         x_delta.attrib["value"] = str(delta)
 
-        # Insert timestamps into response
+        # Insert timestamp tags into response
         x_response.insert(0, x_end_time)
         x_response.insert(0, x_start_time)
         x_response.insert(0, x_delta)
 
-    def persist_response(self, x_response):
-        response = ET.tostring(x_response).decode("UTF-8")
-        self.instruction.response = response
+    def persist_instruction(self):
+        """
+        Encodes instruction into json and writes it to Instruction.file_path()
+        """
         with open(self.instruction.file_path(), "w") as file:
             instruction_txt = instruction_encoder.encode(self.instruction)
-            file.writelines(instruction_txt)
+            file.write(instruction_txt)
