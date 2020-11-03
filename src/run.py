@@ -1,8 +1,6 @@
 from typing import List
 
-from fhir.fhir_executor import execute_query
-from fhir.fhir_parser import get_patient_ids_from_bundle, build_result_set_from_query_results
-from fhir.fhir_query_gen import generate_fhir_cnf
+from fhir import generate_fhir_cnf, get_patient_ids_from_bundle, build_result_set_from_query_results, execute_fhir_query
 from i2b2.i2b2_parser import parse_i2b2_query_xml_string
 import timeit
 
@@ -19,7 +17,7 @@ def run(i2b2_query_definition: str) -> List[str]:
     print(f"Took {elapsed} seconds to evaluate i2b2 and generate FHIR queries")
 
     start_time = timeit.default_timer()
-    fhir_cnf_responses = [[execute_query(query) for query in fhir_disjunction] for fhir_disjunction in
+    fhir_cnf_responses = [[execute_fhir_query(query) for query in fhir_disjunction] for fhir_disjunction in
                           fhir_cnf]
     elapsed = timeit.default_timer() - start_time
     print(f"Took {elapsed} seconds to execute fhir queries")

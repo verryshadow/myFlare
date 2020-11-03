@@ -43,4 +43,4 @@ def handle_result_query(query_id: str):
 
 worker = Worker(instruction_queue)
 worker.start()
-app.run("localhost", 5000)
+app.run("localhost", 5001)

@@ -2,7 +2,7 @@ from queue import Queue
 from threading import Thread
 import xml.etree.ElementTree as ET
 import time
-from typing import List
+from typing import List, Optional
 
 from requests import RequestException
 
@@ -12,6 +12,7 @@ from worker.instruction import ExecutionState
 
 
 def build_response(result_set: List[str]) -> ET.Element:
+    # TODO: Add different response modes
     x_result_set = ET.Element("resultSet")
     x_result = ET.Element("patient_count")
     x_result.attrib["value"] = str(len(result_set))
@@ -36,7 +37,7 @@ class Worker(Thread):
         """
         Queue connecting the worker thread to the main thread
         """
-        self.instruction: Instruction = None
+        self.instruction: Optional[Instruction] = None
         """
         Instruction currently processed by the thread
         """
@@ -59,7 +60,7 @@ class Worker(Thread):
         Processes the current instruction and persists the result
         """
         try:
-            # process instruction and build response
+            # Process instruction and build response
             result_set: List[str] = process_request(self.instruction.request_data)
             x_response = build_response(result_set)
             self.insert_timestamps(x_response)
@@ -71,6 +72,7 @@ class Worker(Thread):
             self.persist_instruction()
 
         except RequestException as e:
+            # TODO: Exception handling
             return "Connection error with upstream FHIR server", 504
 
     def insert_timestamps(self, x_response):

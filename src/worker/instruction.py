@@ -12,7 +12,7 @@ Enum allowing Instruction to detail in which stage of execution it currently is
 
 class Instruction:
     def __init__(self, request_data: str, request_id: UUID, queue_time: int,
-                 state: ExecutionState = ExecutionState.Queued, processing_start_time: int = 0):
+                 state: ExecutionState = ExecutionState.Queued, processing_start_time: int = 0, response: str = ""):
         """
         Creates a new Instruction that can be processed by the worker thread by putting it in the queue
 
@@ -26,7 +26,7 @@ class Instruction:
         """
         Data contained in the request body
         """
-        self.response: str
+        self.response: str = response
         """
         Marshalled response xml
         """
@@ -61,9 +61,11 @@ class InstructionEncoder(JSONEncoder):
     def default(self, o: Instruction) -> dict:
         obj_repr = {
             "request_data": o.request_data,
+            "response": o.response,
             "request_id": str(o.request_id),
             "queue_time": o.queue_time,
-            "execution_state": o.state.value
+            "processing_start_time": o.processing_start_time,
+            "execution_state": o.state.name
         }
         return obj_repr
 
@@ -82,6 +84,7 @@ def instruction_decoder_object_hook(o: dict) -> Instruction:
     request_data = o["request_data"]
     queue_time = o["queue_time"] if "queue_time" in o else time.time_ns()
     request_id = UUID(o["request_id"]) if "request_id" in o else uuid4()
+    # TODO parse response and processing_start_time
     state = ExecutionState.Queued
     if "execution_state" in o:
         # Make sure state exists

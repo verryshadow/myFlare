@@ -1,80 +1,74 @@
-from typing import List
+from typing import List, Set
 import xml.etree.ElementTree as ET
+from fhir.namespace import ns
 
-_ns = {"ns0": "http://hl7.org/fhir"}
 
+def get_patient_ids_from_bundle(bundle: ET.Element) -> Set[str]:
+    """
+    Extracts all patient ids from the entities contained in a bundle
 
-def get_patient_ids_from_bundle(bundle: ET.Element) -> List[str]:
-    ids = []
+    :param bundle: FHIR-bundle given in response to a search containing patients observations and encounters
+    :return: list of patient ids
+    """
+    ids = set()
     entries = _split_bundle(bundle)
     for entry in entries:
         resource = _extract_resource_from_entry(entry)
         resource_type = _get_resource_type(resource)
         id_extractor = _resource_to_extractor_mapping[resource_type]
-        ids.append(id_extractor(resource))
+        ids = ids.union(id_extractor(resource))
 
     return ids
 
 
-def build_unions(fhir_query_ids_a: List[str], fhir_query_ids_b: List[str]) -> List[str]:
-    # Ugly but I couldn't be bothered to change the signatures
-    return list(set(fhir_query_ids_a).union(set(fhir_query_ids_b)))
+def _get_resource_type(x_resource: ET.Element) -> str:
+    """
+    Retrieves the entity type (patient, observation ...) from a resource
 
-
-def build_intersections(fhir_query_ids_a: List[str], fhir_query_ids_b: List[str]) -> List[str]:
-    return list(set(fhir_query_ids_a).intersection(set(fhir_query_ids_b)))
-
-
-def build_result_set_from_query_results(fhir_query_results: List[List[List[List[str]]]]) -> List[str]:
-    results = None
-    for fhir_cnf_results in fhir_query_results:
-        unions = []
-        for fhir_disjunction_results in fhir_cnf_results:
-            page_union = []
-            for fhir_page in fhir_disjunction_results:
-                page_union = build_unions(page_union, fhir_page)
-            unions = build_unions(unions, page_union)
-        if results is None:
-            results = unions
-        results = build_intersections(results, unions)
-    return results
-
-
-def _get_resource_type(resource):
-    tag = resource.tag
+    :param x_resource: <resource></resource>
+    :return: the type of entity contained in the resource
+    """
+    tag = x_resource.tag
 
     # Remove namespace for easier lookup
     ns_split = tag.split("}")
     if len(ns_split) > 1:
         tag = ns_split[1]
+
     return tag.lower()
 
 
-def _extract_ids_from_patient(patient: ET.Element) -> str:
-    x_id = patient.find("./ns0:id", _ns)
+def _extract_id_from_patient(patient: ET.Element) -> str:
+    x_id = patient.find("./ns0:id", ns)
 
     if x_id is None:
-        x_identifier = patient.find("./ns0:identifier", _ns)
-        x_identifier_value = x_identifier.find("./ns0:value", _ns)
+        x_identifier = patient.find("./ns0:identifier", ns)
+        x_identifier_value = x_identifier.find("./ns0:value", ns)
         iD = x_identifier_value.attrib["value"]
     else:
         iD = x_id.attrib["value"]
     return iD
 
 
-def _extract_ids_from_observation(observation: ET.Element) -> str:
-    x_identifier = observation.find(".ns0:subject/ns0:identifier", _ns)
-    x_identifier_value = x_identifier.find("./ns0:value", _ns)
+def _extract_id_from_observation(observation: ET.Element) -> str:
+    x_identifier = observation.find(".ns0:subject/ns0:identifier", ns)
+    x_identifier_value = x_identifier.find("./ns0:value", ns)
     return x_identifier_value.attrib["value"]
 
 
-def _extract_ids_from_encounter(encounter: ET.Element) -> str:
-    # TODO
+def _extract_id_from_encounter(encounter: ET.Element) -> str:
+    # TODO implement
     pass
 
 
 def _split_bundle(bundle: ET.Element) -> List[ET.Element]:
-    entries = bundle.findall("./ns0:entry", _ns)
+    """
+    Split the bundle and return all entry tags in the bundle
+
+    :param bundle: FHIR bundle
+    :return: entries contained in the bundle
+    """
+    entries = bundle.findall("./ns0:entry", ns)
     return entries
 
 
@@ -83,12 +77,34 @@ def _extract_resource_from_entry(entry: ET.Element) -> ET.Element:
     :param entry: <entry></entry>
     :return: the element found inside the <resource></resource> in the entry
     """
-    resource = list(entry.find("./ns0:resource", _ns))[0]
+    resource = list(entry.find("./ns0:resource", ns))[0]
     return resource
 
 
 _resource_to_extractor_mapping = {
-    "patient": _extract_ids_from_patient,
-    "observation": _extract_ids_from_observation,
-    "encounter": _extract_ids_from_encounter,
+    "patient": _extract_id_from_patient,
+    "observation": _extract_id_from_observation,
+    "encounter": _extract_id_from_encounter,
 }
+
+
+def build_result_set_from_query_results(fhir_query_results: List[List[List[Set[str]]]]) -> List[str]:
+    """
+    Resolves the CNF given to it in form of all the FHIR-queries belonging to a request
+
+    :param fhir_query_results:
+    All ids from the FHIR-query results given in the format of a CNF, where a single query consists of a List of Sets
+    of ids, where each set represents a single page from the query result
+    :return: The resolved CNF
+    """
+    panels = list()
+    # Iterate over all panels from the request
+    for fhir_cnf_results in fhir_query_results:
+        items = list()
+        # Iterate over all items from the panel
+        for fhir_disjunction_results in fhir_cnf_results:
+            # Items are translated into one FHIR-query, an executed FHIR-query consists of pages, build union of it
+            items.append(set.union(*fhir_disjunction_results))
+        panels.append(set.union(*items))
+
+    return list(set.intersection(*panels))
