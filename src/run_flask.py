@@ -1,11 +1,14 @@
 import time
 from queue import Queue
+from typing import Optional
 
 from flask import Flask, request
 from uuid import uuid4, UUID
 
-from worker import instruction_encoder
-from worker.instruction import Instruction
+import os.path
+
+from worker import instruction_encoder, instruction_decoder
+from worker.instruction import Instruction, get_request_file_path
 from worker.worker import Worker
 
 app = Flask(__name__)
@@ -30,15 +33,32 @@ def handle_i2b2_query():
     return f"/query/{str(instruction.request_id)}/status", 200
 
 
-def get_state(query_id) -> str:
-    pass
+def get_query(query_id: str) -> Optional[Instruction]:
+    request_path = get_request_file_path(query_id)
+
+    # Make sure path exists
+    if not os.path.exists(request_path):
+        return None
+    instruction = instruction_decoder.decode(open(request_path, "r").read())
+    return instruction
 
 
 @app.route("/query/<query_id>/status", methods=["GET"])
-def handle_result_query(query_id: str):
-    state = get_state(query_id)
-    if state is None:
+def handle_query_state(query_id: str):
+    query = get_query(query_id)
+    if query is None:
         return "No Query under this id", 404
+
+    return query.state.name
+
+
+@app.route("/query/<query_id>/results", methods=["GET"])
+def handle_query_result(query_id: str):
+    query = get_query(query_id)
+    if query is None:
+        return "No Query under this id", 404
+
+    return query.response
 
 
 worker = Worker(instruction_queue)

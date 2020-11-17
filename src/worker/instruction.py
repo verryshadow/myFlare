@@ -51,7 +51,7 @@ class Instruction:
         """
         :return: unique filepath for this instruction based on it's id
         """
-        return f"worker/requests/{self.request_id}.json"
+        return get_request_file_path(str(self.request_id))
 
 
 class InstructionEncoder(JSONEncoder):
@@ -90,8 +90,11 @@ def instruction_decoder_object_hook(o: dict) -> Instruction:
         # Make sure state exists
         if o["execution_state"] in ExecutionState.__members__:
             state = ExecutionState[o["execution_state"]]
+    response = o["response"] if "response" in o else ""
+    processing_start_time = o["processing_start_time"] if "processing_start_time" in o else 0
 
-    return Instruction(request_data, request_id, queue_time, state=state)
+    return Instruction(request_data, request_id, queue_time, state=state, processing_start_time=processing_start_time,
+                       response=response)
 
 
 instruction_encoder: JSONEncoder = InstructionEncoder()
@@ -102,6 +105,10 @@ instruction_decoder: JSONDecoder = JSONDecoder(object_hook=instruction_decoder_o
 """
 Decodes JSON into Instructions
 """
+
+
+def get_request_file_path(request_id: str):
+    return f"worker/requests/{request_id}.json"
 
 
 if __name__ == "__main__":
