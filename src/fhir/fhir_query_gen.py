@@ -36,6 +36,12 @@ def get_value_search_param(value_type: str) -> str:
 
 
 def generate_fhir_disjunction(panel: List[dict]) -> List[str]:
+    """
+    Generates a list of FHIR-queries from a list of dicts describing an i2b2 Panel
+
+    :param panel: List of dictionaries describing i2b2 items
+    :return: FHIR-queries corresponding to
+    """
     queries = [generate_fhir_query(item) for item in panel]
     return queries
 
@@ -43,6 +49,7 @@ def generate_fhir_disjunction(panel: List[dict]) -> List[str]:
 def generate_fhir_query(item: dict) -> str:
     """
     Generates a single FHIR-query from a dict describing an i2b2 item
+
     :param item: dictionary describing an i2b2 item
     :return: Corresponding query url
     """
