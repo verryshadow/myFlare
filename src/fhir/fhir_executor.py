@@ -25,6 +25,7 @@ def execute_fhir_query(query: str) -> List[ET.Element]:
     # Execute queries as long as there is a next page
     while next_query is not None:
         next_query, x_response = _execute_single_query(next_query)
+        persist_query_response(x_response)
         ret.append(x_response)
 
     return ret
@@ -82,3 +83,13 @@ class RequestUnsuccessfulError(Exception):
         """
         Message describing the exception
         """
+
+
+persistence_index = 0
+
+
+def persist_query_response(x_response):
+    global persistence_index
+    with open(f"../FHIR/fhir_responses/{persistence_index}.xml", "w", encoding="UTF-8") as persistence_file:
+        persistence_file.writelines(ET.tostring(x_response).decode("UTF-8"))
+    persistence_index = persistence_index + 1

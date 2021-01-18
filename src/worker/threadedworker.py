@@ -3,12 +3,14 @@ from threading import Thread
 import xml.etree.ElementTree as ET
 import time
 from typing import List, Optional
+from os import path
 
 from requests import RequestException
 
 from run import run as process_request
 from worker import Instruction, instruction_encoder
-from worker.instruction import ExecutionState
+from worker.communication.instruction import ExecutionState
+from worker.communication.processing_event import ProcessingEvent
 
 
 def build_response(result_set: List[str]) -> ET.Element:
@@ -25,15 +27,21 @@ def build_response(result_set: List[str]) -> ET.Element:
     #       x_result_set.insert(0, x_result)
 
 
-class Worker(Thread):
+class ThreadedWorker(Thread):
     """
     Thread that processes instructions passed to it through a shared queue
     """
-    def __init__(self, q: 'Queue[Instruction]'):
+    def __init__(self, instruction_queue: 'Queue[Instruction]', event_queue: 'Queue[ProcessingEvent]'):
         """
-        :param q: means of communicating with the thread, Instructions put in the queue will be processed by the worker
+
+        :param instruction_queue: means of communicating with the thread, Instructions put in the queue will be processed by the worker
+        :param event_queue: means of communicating with the server, worker can update the server about changes
         """
-        self.q: Queue[Instruction] = q
+        self.instruction_queue: Queue[Instruction] = instruction_queue
+        """
+        Queue allowing communication from main thread to worker thread
+        """
+        self.event_queue: Queue[ProcessingEvent] = event_queue
         """
         Queue connecting the worker thread to the main thread
         """
@@ -43,14 +51,22 @@ class Worker(Thread):
         """
         super().__init__()
 
+    # TODO: Handle graceful shutdown
     def run(self):
         while True:
             # Wait for main thread to add instruction to queue
-            self.instruction = self.q.get(block=True, timeout=None)
+            self.instruction = self.instruction_queue.get(block=True, timeout=None)
+            # Skip removed instructions since they cannot be deleted from the Queue
+            if self.current_instruction_deleted():
+                continue
 
             # Setup instruction to process
             self.instruction.processing_start_time = time.time_ns()
             self.instruction.state = ExecutionState.Executing
+
+            # Notify queue about event
+            event = ProcessingEvent(time.time_ns(), str(self.instruction.request_id), self.instruction.state)
+            self.event_queue.put(event)
 
             # Process instruction
             self.handle()
@@ -70,6 +86,10 @@ class Worker(Thread):
             self.instruction.response = response
             self.instruction.state = ExecutionState.Done
             self.persist_instruction()
+
+            # Notify server about event
+            event = ProcessingEvent(time.time_ns(), str(self.instruction.request_id), self.instruction.state)
+            self.event_queue.put(event)
 
         except RequestException as e:
             # TODO: Exception handling
@@ -108,3 +128,10 @@ class Worker(Thread):
         with open(self.instruction.file_path(), "w") as file:
             instruction_txt = instruction_encoder.encode(self.instruction)
             file.write(instruction_txt)
+
+    def current_instruction_deleted(self) -> bool:
+        """
+        checks whether the instruction currently processed has been deleted by the user
+        :return: true if Instruction persistence has been removed
+        """
+        return not path.exists(self.instruction.file_path())

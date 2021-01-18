@@ -16,7 +16,7 @@ def get_patient_ids_from_bundle(bundle: ET.Element) -> Set[str]:
         resource = _extract_resource_from_entry(entry)
         resource_type = _get_resource_type(resource)
         id_extractor = _resource_to_extractor_mapping[resource_type]
-        ids = ids.union(id_extractor(resource))
+        ids = ids.union([id_extractor(resource)])
 
     return ids
 
@@ -106,5 +106,6 @@ def build_result_set_from_query_results(fhir_query_results: List[List[List[Set[s
             # Items are translated into one FHIR-query, an executed FHIR-query consists of pages, build union of it
             items.append(set.union(*fhir_disjunction_results))
         panels.append(set.union(*items))
-
+    if len(panels) == 0:
+        return []
     return list(set.intersection(*panels))

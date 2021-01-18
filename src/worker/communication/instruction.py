@@ -4,7 +4,8 @@ import time
 from uuid import UUID, uuid4
 from enum import Enum
 
-ExecutionState = Enum("ExecutionState", "Queued Executing Aborted Done")
+# TODO: Replace Executing with query execution
+ExecutionState = Enum("ExecutionState", "Queued Executing ResultBuilding Aborted Done")
 """
 Enum allowing Instruction to detail in which stage of execution it currently is
 """
@@ -30,6 +31,7 @@ class Instruction:
         """
         Marshalled response xml
         """
+        # TODO: Replace UUID type with str
         self.request_id: UUID = request_id
         """
         Generated unique id, used to track the request

@@ -19,6 +19,30 @@
       "code": "unknown"
     }
   ],
+  "\\\\i2b2_DEMO\\i2b2\\Demographics\\Gender\\Male\\": [
+    {
+      "res": "Patient",
+      "param": "gender",
+      "sys": "",
+      "code": "male"
+    }
+  ],
+  "\\\\i2b2_DEMO\\i2b2\\Demographics\\Gender\\Female\\": [
+    {
+      "res": "Patient",
+      "param": "gender",
+      "sys": "",
+      "code": "female"
+    }
+  ],
+  "\\\\i2b2_DEMO\\i2b2\\Demographics\\Gender\\Unknown\\": [
+    {
+      "res": "Patient",
+      "param": "gender",
+      "sys": "",
+      "code": "unknown"
+    }
+  ],
   "/pat/gender/male": [
     {
       "res": "Patient",
@@ -67,6 +91,22 @@
     }
   ],
   "\\\\i2b2_DEMO\\i2b2\\Demographics\\alive\\": [
+    {
+      "res": "Patient",
+      "param": "deceased-date:missing",
+      "sys": "",
+      "code": "true"
+    }
+  ],
+  "/pat/survival/dead": [
+    {
+      "res": "Patient",
+      "param": "deceased",
+      "sys": "",
+      "code": "true"
+    }
+  ],
+  "/pat/survival/alive": [
     {
       "res": "Patient",
       "param": "deceased-date:missing",

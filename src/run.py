@@ -9,6 +9,12 @@ __debug = True
 
 
 def run(i2b2_query_definition: str) -> List[str]:
+    """
+    Main function, runs the entire Script and returns a set of IDs
+
+    :param i2b2_query_definition: The definition of the i2b2 query which is to be executed against a FHIR Server
+    :return: The resulting IDs that fit the query
+    """
     fhir_cnf = prepare_fhir_cnf(i2b2_query_definition)
     fhir_cnf_responses = execute_fhir_queries(fhir_cnf)
     result_set = build_result_set(fhir_cnf_responses)
@@ -19,6 +25,12 @@ def run(i2b2_query_definition: str) -> List[str]:
 
 
 def build_result_set(fhir_cnf_responses: List[List[List[Element]]]) -> List[str]:
+    """
+    Builds the resulting set of IDs by resolving the CNF
+
+    :param fhir_cnf_responses: List of Disjunctions, in turn made up of a List of query results, made up of pages
+    :return: List of IDs that fit the original i2b2 query definition
+    """
     start_time = timeit.default_timer()
     fhir_query_results = extract_resulting_ids(fhir_cnf_responses)
     result_set = build_result_set_from_query_results(fhir_query_results)
@@ -29,6 +41,13 @@ def build_result_set(fhir_cnf_responses: List[List[List[Element]]]) -> List[str]
 
 
 def extract_resulting_ids(fhir_cnf_responses: List[List[List[Element]]]) -> List[List[List[Set[str]]]]:
+    """
+
+
+    :param fhir_cnf_responses:
+    :return:
+    """
+    # TODO: Find a cleaner way to do this
     fhir_query_results = []
     for fhir_disjunction_response in fhir_cnf_responses:
         fhir_cnf_results = []
@@ -43,6 +62,12 @@ def extract_resulting_ids(fhir_cnf_responses: List[List[List[Element]]]) -> List
 
 
 def execute_fhir_queries(fhir_cnf: List[List[str]]) -> List[List[List[Element]]]:
+    """
+
+
+    :param fhir_cnf:
+    :return:
+    """
     start_time = timeit.default_timer()
     fhir_cnf_responses = [[execute_fhir_query(query) for query in fhir_disjunction] for fhir_disjunction in
                           fhir_cnf]
@@ -53,6 +78,12 @@ def execute_fhir_queries(fhir_cnf: List[List[str]]) -> List[List[List[Element]]]
 
 
 def prepare_fhir_cnf(i2b2_query_definition: str) -> List[List[str]]:
+    """
+    Parses the i2b2 Query and for each panel generates a List of queries
+
+    :param i2b2_query_definition: the untouched i2b2 Query definition
+    :return: List queries for each panel
+    """
     start_time = timeit.default_timer()
     parsed_i2b2 = parse_i2b2_query_xml_string(i2b2_query_definition)
     if __debug:
