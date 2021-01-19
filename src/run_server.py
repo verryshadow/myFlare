@@ -1,10 +1,9 @@
-import asyncio
 import json
 import time
 from queue import Queue, Empty
 from typing import Optional
 
-from quart import Quart as Flask, request, make_response
+from flask import Flask as Flask, request, Response
 from uuid import uuid4, UUID
 
 import os.path
@@ -18,8 +17,11 @@ from run import run
 from xml.etree import ElementTree as ET
 
 app = Flask(__name__)
+
+# Setup worker thread
 instruction_queue: 'Queue[Instruction]' = Queue()
 event_queue: 'Queue[ProcessingEvent]' = Queue()
+worker = ThreadedWorker(instruction_queue, event_queue)
 
 
 def build_response(result_set, i2b2_request):
@@ -29,23 +31,21 @@ def build_response(result_set, i2b2_request):
     x_result_set.insert(0, x_result)
     return x_result_set
 
-#    for result in result_set:
-#       x_result = ET.Element("result")
-#       x_result.attrib["value"] = result
-#       x_result_set.insert(0, x_result)
-
 
 @app.route("/i2b2", methods=["POST"])
 def handle_i2b2_query():
+    """
+    Synchronous execution API
+
+    takes an I2B2 Query Definition in the body and executes it.
+    :return: the number of matching patients found
+    """
     print("handling query")
     # Execute and timestamp
     start_time = time.time()
     i2b2_request = request.data.decode("UTF-8")
-    i2b2_query = request.data.decode("UTF-8")
-    result_set = run(i2b2_query)
-    response = build_response(result_set, i2b2_request)
     try:
-        result_set = run(i2b2_query)
+        result_set = run(i2b2_request)
         response = build_response(result_set, i2b2_request)
     except RequestException as e:
         return "Connection error with upstream FHIR server", 504
@@ -72,11 +72,15 @@ def handle_i2b2_query():
 
 
 @app.route("/query", methods=["POST"])
-async def create_i2b2_query():
+def create_i2b2_query():
+    """
+    Submit a query for execution
+
+    :return: location header containing the url to the result/processing progress
+    """
     # Create Instruction
     queue_insertion_time: int = time.time_ns()
-    print((await request.data).decode("UTF-8"))
-    i2b2_request: str = (await request.data).decode("UTF-8")
+    i2b2_request: str = request.data.decode("UTF-8")
     uuid: UUID = uuid4()
     instruction: Instruction = Instruction(i2b2_request, uuid, queue_insertion_time)
 
@@ -87,14 +91,20 @@ async def create_i2b2_query():
     # Queue for execution
     instruction_queue.put(instruction)
 
-    # TODO: Set response link in location header and HTTP CREATED
-    response = await app.make_response("")
+    # Respond with location header
+    response = app.make_response("")
     response.status_code = 201
     response.headers["Location"] = f"/query/{str(instruction.request_id)}"
     return response
 
 
 def get_query_from_persistence(query_id: str) -> Optional[Instruction]:
+    """
+    Fetches a persisted query
+
+    :param query_id:
+    :return: if found the Instruction for a given query_id otherwise None
+    """
     request_path = get_request_file_path(query_id)
 
     # Make sure path exists
@@ -105,7 +115,13 @@ def get_query_from_persistence(query_id: str) -> Optional[Instruction]:
 
 
 @app.route("/query/<query_id>/status", methods=["GET"])
-async def handle_query_state(query_id: str):
+def handle_query_state(query_id: str):
+    """
+    Fetches the current processing state of a given query
+
+    :param query_id: id of the query to be looked up
+    :return: either 200 and the query state or 400 if query is not found
+    """
     query = get_query_from_persistence(query_id)
     if query is None:
         return "No Query under this id", 404
@@ -114,7 +130,13 @@ async def handle_query_state(query_id: str):
 
 
 @app.route("/query/<query_id>/results", methods=["GET"])
-async def handle_query_result(query_id: str):
+def handle_query_result(query_id: str):
+    """
+    Fetches the response calculated for a query
+
+    :param query_id: id of the query to fetch the response for
+    :return: 404 if not found or the response calculated for the query
+    """
     query = get_query_from_persistence(query_id)
     if query is None:
         return "No Query under this id", 404
@@ -123,7 +145,13 @@ async def handle_query_result(query_id: str):
 
 
 @app.route("/query/<query_id>", methods=["GET"])
-async def get_query(query_id: str):
+def get_query(query_id: str):
+    """
+    Fetches the original request data for a given query
+
+    :param query_id:
+    :return: 404 if not found or the original request data
+    """
     query = get_query_from_persistence(query_id)
     if query is None:
         return "No Query under this id", 404
@@ -132,13 +160,19 @@ async def get_query(query_id: str):
 
 
 @app.route("/query/", methods=["GET"])
-async def list_queries():
-    # TODO Implement
+def list_queries():
+    # TODO discuss if implementing this makes sense
     pass
 
 
 @app.route("/query/<query_id>", methods=["DELETE"])
-async def delete_query(query_id: str):
+def delete_query(query_id: str):
+    """
+    Deletes a persisted query
+
+    :param query_id: id of the query to be deleted
+    :return:
+    """
     request_path = get_request_file_path(query_id)
 
     # Make sure path exists
@@ -149,28 +183,31 @@ async def delete_query(query_id: str):
     return f"Successfully deleted {query_id}", 200
 
 
-@app.route('/subscribe', methods=["GET"])
-async def sse():
-    async def send_events():
-        print("send_events executed")
+def send_events():
+    try:
         while True:
             try:
-                yield json.dumps(event_queue.get(block=False).__dict__).encode("UTF-8")
-                print("Yielded event")
+                yield json.dumps(event_queue.get(block=True).__dict__).encode("UTF-8")
             except Empty:
-                await asyncio.sleep(0.5)
+                pass
+    # Catch user terminating connection
+    except GeneratorExit:
+        # FIXME: somehow only gets thrown when attempting to write to an already closed connection
+        pass
 
-    response = await make_response(
-        send_events(),
-        {
-            'Content-Type': 'text/event-stream',
-            'Cache-Control': 'no-cache',
-            'Transfer-Encoding': 'chunked',
-        },
-    )
+
+@app.route('/subscribe', methods=["GET"])
+def sse():
+    """
+    API for server sent events that triggers when a query has been processed
+
+    :return: Stream over all server events
+    """
+    response = Response(send_events(), mimetype='text/event-stream')
     response.timeout = None
     return response
 
-worker = ThreadedWorker(instruction_queue, event_queue)
-worker.start()
-app.run("localhost", 5001, threaded=True)
+
+if __name__ == '__main__':
+    worker.start()
+    app.run("localhost", 5001, threaded=True)

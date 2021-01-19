@@ -42,10 +42,10 @@ def build_result_set(fhir_cnf_responses: List[List[List[Element]]]) -> List[str]
 
 def extract_resulting_ids(fhir_cnf_responses: List[List[List[Element]]]) -> List[List[List[Set[str]]]]:
     """
+    Replaces the FHIR-Bundles with a set of contained IDs
 
-
-    :param fhir_cnf_responses:
-    :return:
+    :param fhir_cnf_responses: FHIR-Responses in CNF format
+    :return: IDs contained in the FHIR-Bundles
     """
     # TODO: Find a cleaner way to do this
     fhir_query_results = []
@@ -63,10 +63,10 @@ def extract_resulting_ids(fhir_cnf_responses: List[List[List[Element]]]) -> List
 
 def execute_fhir_queries(fhir_cnf: List[List[str]]) -> List[List[List[Element]]]:
     """
+    executes the FHIR Queries
 
-
-    :param fhir_cnf:
-    :return:
+    :param fhir_cnf: FHIR Queries structured in a CNF form
+    :return: The raw FHIR Responses made up of pages structured like the input queries
     """
     start_time = timeit.default_timer()
     fhir_cnf_responses = [[execute_fhir_query(query) for query in fhir_disjunction] for fhir_disjunction in
