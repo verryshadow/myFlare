@@ -1,3 +1,4 @@
+import os
 from json import JSONDecoder
 from json.encoder import JSONEncoder
 import time
@@ -110,7 +111,8 @@ Decodes JSON into Instructions
 
 
 def get_request_file_path(request_id: str):
-    return f"worker/requests/{request_id}.json"
+    base_path = os.environ.get('PERSISTENCE') or "worker/requests"
+    return f"{base_path}/{request_id}.json"
 
 
 if __name__ == "__main__":

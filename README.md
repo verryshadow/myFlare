@@ -11,15 +11,20 @@ Example for bash (e.g. git-bash in Windows)
 ```bash
 pip install -r requirements.txt
 
-FHIR_BASE_URL=http://localhost:5555/fhir FLASK_APP=run_server.py flask run
+FHIR_BASE_URL=http://localhost:5555/fhir python src/run_server.py
 
 ```
-When the server is running, you can run i2b2 queries by posting the query_definition XML to `http://localhost:5000/i2b2`.
+When the server is running, you can synchronously run i2b2 queries by posting the query_definition XML to `http://localhost:5000/i2b2`.
 E.g.
 ```bash
-curl -X POST --data @i2b2/i2b2_demo.xml -H "Content-Type: application/xml" http://localhost:5000/i2b2
+curl -X POST --data @query/i2b2/i2b2_demo.xml -H "Content-Type: application/xml" http://localhost:5000/i2b2
 ```
 
+You can also asynchronously run queries:
+```bash
+curl -X POST --data @query/i2b2/i2b2_demo.xml -H "Content-type: application/xml" http://localhost:5000/query
+```
+which will return with the relative location to the request status in the location header
 
 
 ## Algorithm

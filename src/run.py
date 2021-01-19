@@ -1,12 +1,15 @@
-from typing import List, Set
+from typing import List, Set, Optional
 from xml.etree.ElementTree import Element
-from optparse import OptionParser
+from argparse import ArgumentParser, Namespace
 
 from fhir import generate_fhir_cnf, get_patient_ids_from_bundle, build_result_set_from_query_results, execute_fhir_query
 from query.i2b2.i2b2_parser import parse_i2b2_query_xml_string
 import timeit
 
 __debug = True
+
+# Arguments supplied by the user
+args: Optional[Namespace] = None
 
 
 def run(i2b2_query_definition: str) -> List[str]:
@@ -101,8 +104,16 @@ def prepare_fhir_cnf(i2b2_query_definition: str) -> List[List[str]]:
 
 
 if __name__ == "__main__":
-    # TODO Take input file, mapping file and query syntax as argument
-    parser = OptionParser()
-    (options, args) = parser.parse_args()
-    with open('query/i2b2/i2b2_demo.xml', 'r') as file:
-        run(file.read())
+    parser = ArgumentParser(description="FLARE, run feasibility queries via standard HL7 FHIR search requests")
+    parser.add_argument("query_file", type=str, help="path to the file containing the query")
+
+    # TODO Implement these options
+    parser.add_argument("--mapping", type=str, help="path to the file containing the i2b2 to FHIR mappings")
+    parser.add_argument("--syntax", type=str, choices=["i2b2", "codex"],
+                        help="detail which syntax the query is in, default is i2b2", default="i2b2")
+    args = parser.parse_args()
+    try:
+        with open(args.query_file, 'r') as file:
+            run(file.read())
+    except IOError:
+        print("Error reading the query file")

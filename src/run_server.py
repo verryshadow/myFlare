@@ -1,6 +1,7 @@
 import json
 import os
 import time
+from argparse import ArgumentParser
 from queue import Queue, Empty
 from typing import Optional
 
@@ -11,7 +12,7 @@ import os.path
 from requests import RequestException
 
 from worker import instruction_encoder, instruction_decoder
-from worker.communication.instruction import Instruction, get_request_file_path
+from worker.communication.instruction import Instruction, get_request_file_path, ExecutionState
 from worker.communication.processing_event import ProcessingEvent
 from worker.threadedworker import ThreadedWorker
 from run import run
@@ -209,9 +210,41 @@ def sse():
     return response
 
 
-if __name__ == '__main__':
-    # TODO Make host, port and persistence folder customisable via arguments
-    # TODO Maybe refill queue after restart if option is given
+def refill_queue():
+    """
+    Refills the instruction queue with instructions from persistence
+    """
+    base_path = os.environ.get('PERSISTENCE') or "worker/requests"
+    for file in os.listdir(base_path):
+        # Make sure file is json
+        file_ext = os.path.splitext(file)[1]
+        if not file_ext == "json":
+            continue
 
+        # Decode instruction and skip finished ones
+        instruction: Instruction = instruction_decoder.decode(open(f"{base_path}/{file}", "r").read())
+        if instruction.state == ExecutionState.Done:
+            continue
+
+        instruction_queue.put(instruction)
+
+
+if __name__ == '__main__':
+    # Setup the argument parser
+    parser = ArgumentParser(description="FLARE, run feasibility queries via standard HL7 FHIR search requests")
+    parser.add_argument("--persistence", type=str, help="path to the folder in which queries should be persisted")
+    parser.add_argument("--host", "-H", type=str, help="host on which to listen", default="localhost")
+    parser.add_argument("--port", "-P", type=int, help="port on which to listen", default=5000)
+    parser.add_argument("--continue", action="store_true", dest="cont")
+    args = parser.parse_args()
+
+    # Set application wide persistence folder
+    if args.persistence:
+        os.environ["PERSISTENCE"] = args.persistence
+
+    if args.cont:
+        refill_queue()
+
+    # Start application
     worker.start()
-    app.run("localhost", 5001, threaded=True)
+    app.run(args.host, args.port, threaded=True)
