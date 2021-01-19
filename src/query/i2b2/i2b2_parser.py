@@ -16,7 +16,6 @@ def lookup(item_key: str) -> List[dict]:
             return [{"res": "Observation", "param": "code", "sys": "", "code": code, "valueParam": "value-quantity"}]
         else:
             return []
-        # TODO: Properly handle errors
 
 
 def parse_i2b2_query_xml_string(xml: str) -> List[List[dict]]:
@@ -26,7 +25,7 @@ def parse_i2b2_query_xml_string(xml: str) -> List[List[dict]]:
     # Iterate over panels
     ns = {'ns6': 'http://www.i2b2.org/xsd/hive/msg/1.1/', 'ns4': 'http://www.i2b2.org/xsd/cell/crc/psm/1.1/'}
     for x_panel in root.findall('./query_definition/panel', ns):
-        panel = parse_items(x_panel)
+        panel = parse_panel(x_panel)
 
         if not panel == []:
             panels.append(panel)
@@ -34,7 +33,7 @@ def parse_i2b2_query_xml_string(xml: str) -> List[List[dict]]:
     return panels
 
 
-def parse_items(x_panel):
+def parse_panel(x_panel: ET.Element):
     panel = []
 
     # Iterate over all items in the panel
@@ -43,18 +42,22 @@ def parse_items(x_panel):
         x_item_key = x_item.find("item_key")
         if x_item_key is None:
             continue
-        equivalents = lookup(x_item_key.text)
-
-        for equivalent in equivalents:
-            if "valueParam" in equivalent:
-                x_constrain_by_value = x_item.find("constrain_by_value")
-                if x_constrain_by_value is None:
-                    continue
-
-                parse_value_constraints(equivalent, x_constrain_by_value)
+        equivalents = parse_item(x_item, x_item_key)
 
         panel = panel + equivalents
     return panel
+
+
+def parse_item(x_item: ET.Element, x_item_key: ET.Element):
+    equivalents = lookup(x_item_key.text)
+    for equivalent in equivalents:
+        if "valueParam" in equivalent:
+            x_constrain_by_value = x_item.find("constrain_by_value")
+            if x_constrain_by_value is None:
+                continue
+
+            parse_value_constraints(equivalent, x_constrain_by_value)
+    return equivalents
 
 
 def parse_value_constraints(equivalent, x_constrain_by_value):

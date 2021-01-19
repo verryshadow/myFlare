@@ -51,7 +51,7 @@ class ThreadedWorker(Thread):
         """
         super().__init__()
 
-    # TODO: Handle graceful shutdown
+    # TODO: implement graceful shutdown
     def run(self):
         while True:
             # Wait for main thread to add instruction to queue
@@ -92,7 +92,6 @@ class ThreadedWorker(Thread):
             self.event_queue.put(event)
 
         except RequestException as e:
-            # TODO: Exception handling
             return "Connection error with upstream FHIR server", 504
 
     def insert_timestamps(self, x_response):

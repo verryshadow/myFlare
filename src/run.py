@@ -1,8 +1,9 @@
 from typing import List, Set
 from xml.etree.ElementTree import Element
+from optparse import OptionParser
 
 from fhir import generate_fhir_cnf, get_patient_ids_from_bundle, build_result_set_from_query_results, execute_fhir_query
-from i2b2.i2b2_parser import parse_i2b2_query_xml_string
+from query.i2b2.i2b2_parser import parse_i2b2_query_xml_string
 import timeit
 
 __debug = True
@@ -85,10 +86,12 @@ def prepare_fhir_cnf(i2b2_query_definition: str) -> List[List[str]]:
     :return: List queries for each panel
     """
     start_time = timeit.default_timer()
-    parsed_i2b2 = parse_i2b2_query_xml_string(i2b2_query_definition)
+    # TODO Replace this with dynamical call to query parser based on syntax_var
+    intermediate_query_repr = parse_i2b2_query_xml_string(i2b2_query_definition)
+    print(intermediate_query_repr)
     if __debug:
-        print(f"Parsed i2b2:\n {parsed_i2b2}\n")
-    fhir_cnf = generate_fhir_cnf(parsed_i2b2)
+        print(f"Parsed i2b2:\n {intermediate_query_repr}\n")
+    fhir_cnf = generate_fhir_cnf(intermediate_query_repr)
     if __debug:
         print(f"generated FHIR_cnf:\n {fhir_cnf}\n")
     elapsed = timeit.default_timer() - start_time
@@ -98,5 +101,8 @@ def prepare_fhir_cnf(i2b2_query_definition: str) -> List[List[str]]:
 
 
 if __name__ == "__main__":
-    with open('I2B2/i2b2_demo.xml', 'r') as file:
+    # TODO Take input file, mapping file and query syntax as argument
+    parser = OptionParser()
+    (options, args) = parser.parse_args()
+    with open('query/i2b2/i2b2_demo.xml', 'r') as file:
         run(file.read())

@@ -11,7 +11,8 @@ import urllib3
 urllib3.disable_warnings()
 
 
-# TODO: Create parallel requests with user config, maybe slower?
+# TODO: Create parallel requests with user config.
+#  Check whether this may slow down the process due to FHIR-server performance beforehand
 def execute_fhir_query(query: str) -> List[ET.Element]:
     """
     Executes a FHIR query, fetches all pages
@@ -25,7 +26,7 @@ def execute_fhir_query(query: str) -> List[ET.Element]:
     # Execute queries as long as there is a next page
     while next_query is not None:
         next_query, x_response = _execute_single_query(next_query)
-        persist_query_response(x_response)
+        # persist_query_response(x_response)
         ret.append(x_response)
 
     return ret
@@ -89,6 +90,11 @@ persistence_index = 0
 
 
 def persist_query_response(x_response):
+    """
+    For debugging purposes only, persists a query response under a running index
+
+    :param x_response: response to be persisted
+    """
     global persistence_index
     with open(f"../FHIR/fhir_responses/{persistence_index}.xml", "w", encoding="UTF-8") as persistence_file:
         persistence_file.writelines(ET.tostring(x_response).decode("UTF-8"))

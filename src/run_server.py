@@ -1,4 +1,5 @@
 import json
+import os
 import time
 from queue import Queue, Empty
 from typing import Optional
@@ -161,7 +162,7 @@ def get_query(query_id: str):
 
 @app.route("/query/", methods=["GET"])
 def list_queries():
-    # TODO discuss if implementing this makes sense
+    # TODO implement this     os.listdir()
     pass
 
 
@@ -209,5 +210,8 @@ def sse():
 
 
 if __name__ == '__main__':
+    # TODO Make host, port and persistence folder customisable via arguments
+    # TODO Maybe refill queue after restart if option is given
+
     worker.start()
     app.run("localhost", 5001, threaded=True)
