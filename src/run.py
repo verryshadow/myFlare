@@ -1,10 +1,12 @@
 from typing import List, Set, Optional
 from xml.etree.ElementTree import Element
 from argparse import ArgumentParser, Namespace
+import time
+import timeit
 
 from fhir import generate_fhir_cnf, get_patient_ids_from_bundle, build_result_set_from_query_results, execute_fhir_query
-from parser.i2b2.i2b2_parser import parse_i2b2_query_xml_string
-import timeit
+from query_parser import QuerySyntax, syntax_parser_map
+from worker import Instruction
 
 __debug = True
 
@@ -12,14 +14,14 @@ __debug = True
 args: Optional[Namespace] = None
 
 
-def run(i2b2_query_definition: str) -> List[str]:
+def run(instruction: Instruction) -> List[str]:
     """
     Main function, runs the entire Script and returns a set of IDs
 
-    :param i2b2_query_definition: The definition of the i2b2 query which is to be executed against a FHIR Server
+    :param instruction: The query which is to be executed against a FHIR Server
     :return: The resulting IDs that fit the query
     """
-    fhir_cnf = prepare_fhir_cnf(i2b2_query_definition)
+    fhir_cnf = prepare_fhir_cnf(instruction.request_data, instruction.query_syntax)
     fhir_cnf_responses = execute_fhir_queries(fhir_cnf)
     result_set = build_result_set(fhir_cnf_responses)
 
@@ -33,7 +35,7 @@ def build_result_set(fhir_cnf_responses: List[List[List[Element]]]) -> List[str]
     Builds the resulting set of IDs by resolving the CNF
 
     :param fhir_cnf_responses: List of Disjunctions, in turn made up of a List of query results, made up of pages
-    :return: List of IDs that fit the original i2b2 query definition
+    :return: List of IDs that fit the original query definition
     """
     start_time = timeit.default_timer()
     fhir_query_results = extract_resulting_ids(fhir_cnf_responses)
@@ -81,25 +83,17 @@ def execute_fhir_queries(fhir_cnf: List[List[str]]) -> List[List[List[Element]]]
     return fhir_cnf_responses
 
 
-def prepare_fhir_cnf(i2b2_query_definition: str) -> List[List[str]]:
+def prepare_fhir_cnf(query_definition: str, query_syntax: QuerySyntax) -> List[List[str]]:
     """
-    Parses the i2b2 Query and for each panel generates a List of queries
+    Parses the Query and for each panel generates a List of queries
 
-    :param i2b2_query_definition: the untouched i2b2 Query definition
+    :param query_syntax: Syntax of the query to be processed
+    :param query_definition: the untouched Query definition
     :return: List queries for each panel
     """
-    start_time = timeit.default_timer()
-    # TODO Replace this with dynamical call to query parser based on syntax_var
-    intermediate_query_repr = parse_i2b2_query_xml_string(i2b2_query_definition)
-    print(intermediate_query_repr)
-    if __debug:
-        print(f"Parsed i2b2:\n {intermediate_query_repr}\n")
+
+    intermediate_query_repr = syntax_parser_map[query_syntax](query_definition)
     fhir_cnf = generate_fhir_cnf(intermediate_query_repr)
-    if __debug:
-        print(f"generated FHIR_cnf:\n {fhir_cnf}\n")
-    elapsed = timeit.default_timer() - start_time
-    if __debug:
-        print(f"Took {elapsed} seconds to evaluate i2b2 and generate FHIR queries")
     return fhir_cnf
 
 
@@ -110,13 +104,16 @@ if __name__ == "__main__":
 
     # TODO Implement these options
     parser.add_argument("--mapping", type=str, help="path to the file containing the i2b2 to FHIR mappings")
-    parser.add_argument("--syntax", type=str, choices=["i2b2", "codex"],
-                        help="detail which syntax the query is in, default is i2b2", default="i2b2")
+    parser.add_argument("--syntax", type=str, choices=["I2B2", "CODEX"],
+                        help="detail which syntax the query is in, default is I2B2", default="I2B2")
     args = parser.parse_args()
 
-    # Run the Script
+    # Create instruction
     try:
         with open(args.query_file, 'r') as file:
-            run(file.read())
+           ins = Instruction(file.read(), "local_request", time.time_ns(), query_syntax=QuerySyntax[args.syntax])
     except IOError:
         print("Error reading the query file")
+
+    # Run the Script
+    run(ins)

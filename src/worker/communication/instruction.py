@@ -3,8 +3,11 @@ from json import JSONDecoder
 from json.encoder import JSONEncoder
 import time
 from enum import Enum
+from query_parser import QuerySyntax
+
 
 # TODO: Replace Executing with query execution
+
 ExecutionState = Enum("ExecutionState", "Queued Executing ResultBuilding Aborted Done")
 """
 Enum allowing Instruction to detail in which stage of execution it currently is
@@ -13,7 +16,8 @@ Enum allowing Instruction to detail in which stage of execution it currently is
 
 class Instruction:
     def __init__(self, request_data: str, request_id: str, queue_time: int,
-                 state: ExecutionState = ExecutionState.Queued, processing_start_time: int = 0, response: str = ""):
+                 state: ExecutionState = ExecutionState.Queued, processing_start_time: int = 0, response: str = "",
+                 query_syntax: QuerySyntax = QuerySyntax.I2B2):
         """
         Creates a new Instruction that can be processed by the worker thread by putting it in the queue
 
@@ -22,6 +26,8 @@ class Instruction:
         :param queue_time: Timestamp this got queued
         :param state: Current execution state of the instruction, default is Queued
         :param processing_start_time: Timestamp worker started processing this
+        :param query_syntax: Syntax the request is formulated in
+
         """
         self.request_data: str = request_data
         """
@@ -47,6 +53,10 @@ class Instruction:
         """
         Timestamp worker started processing this
         """
+        self.query_syntax: QuerySyntax = query_syntax
+        """
+        Syntax the request is formulated in
+        """
 
     def file_path(self) -> str:
         """
@@ -66,7 +76,8 @@ class InstructionEncoder(JSONEncoder):
             "request_id": o.request_id,
             "queue_time": o.queue_time,
             "processing_start_time": o.processing_start_time,
-            "execution_state": o.state.name
+            "execution_state": o.state.name,
+            "request_type": o.query_syntax.value
         }
         return obj_repr
 
@@ -92,10 +103,11 @@ def instruction_decoder_object_hook(o: dict) -> Instruction:
         if o["execution_state"] in ExecutionState.__members__:
             state = ExecutionState[o["execution_state"]]
     response = o["response"] if "response" in o else ""
+    request_type = QuerySyntax[o["request_type"]] if "request_type" in o else QuerySyntax.I2B2
     processing_start_time = o["processing_start_time"] if "processing_start_time" in o else 0
 
     return Instruction(request_data, request_id, queue_time, state=state, processing_start_time=processing_start_time,
-                       response=response)
+                       response=response, query_syntax=request_type)
 
 
 instruction_encoder: JSONEncoder = InstructionEncoder()

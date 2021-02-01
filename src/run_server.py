@@ -80,9 +80,13 @@ def create_query():
 
     :return: location header containing the url to the result/processing progress
     """
+    # Extract data from Request
+    request_format = request.headers["Content-Type"]
+    response_format = request.headers["Accept"]
+    i2b2_request: str = request.data.decode("UTF-8")
+
     # Create Instruction
     queue_insertion_time: int = time.time_ns()
-    i2b2_request: str = request.data.decode("UTF-8")
     uuid: UUID = uuid4()
     instruction: Instruction = Instruction(i2b2_request, str(uuid), queue_insertion_time)
 
@@ -230,7 +234,7 @@ def refill_queue():
 
 
 if __name__ == '__main__':
-    # Setup the argument parser
+    # Setup the argument query_parser
     parser = ArgumentParser(description="FLARE, run feasibility queries via standard HL7 FHIR search requests")
     parser.add_argument("--persistence", type=str, help="path to the folder in which queries should be persisted")
     parser.add_argument("--host", "-H", type=str, help="host on which to listen", default="localhost")

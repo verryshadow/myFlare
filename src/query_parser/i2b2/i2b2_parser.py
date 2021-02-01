@@ -2,7 +2,7 @@ import xml.etree.ElementTree as ET
 from typing import List
 import json
 
-with open("query/i2b2/mapping.json") as mapping:
+with open("query_parser/i2b2/mapping.json") as mapping:
     config = json.load(mapping)
 
 
