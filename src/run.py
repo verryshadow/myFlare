@@ -104,6 +104,7 @@ def prepare_fhir_cnf(i2b2_query_definition: str) -> List[List[str]]:
 
 
 if __name__ == "__main__":
+    # Parse arguments
     parser = ArgumentParser(description="FLARE, run feasibility queries via standard HL7 FHIR search requests")
     parser.add_argument("query_file", type=str, help="path to the file containing the query")
 
@@ -112,6 +113,8 @@ if __name__ == "__main__":
     parser.add_argument("--syntax", type=str, choices=["i2b2", "codex"],
                         help="detail which syntax the query is in, default is i2b2", default="i2b2")
     args = parser.parse_args()
+
+    # Run the Script
     try:
         with open(args.query_file, 'r') as file:
             run(file.read())

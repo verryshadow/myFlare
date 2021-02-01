@@ -2,7 +2,6 @@ import os
 from json import JSONDecoder
 from json.encoder import JSONEncoder
 import time
-from uuid import UUID, uuid4
 from enum import Enum
 
 # TODO: Replace Executing with query execution
@@ -13,7 +12,7 @@ Enum allowing Instruction to detail in which stage of execution it currently is
 
 
 class Instruction:
-    def __init__(self, request_data: str, request_id: UUID, queue_time: int,
+    def __init__(self, request_data: str, request_id: str, queue_time: int,
                  state: ExecutionState = ExecutionState.Queued, processing_start_time: int = 0, response: str = ""):
         """
         Creates a new Instruction that can be processed by the worker thread by putting it in the queue
@@ -32,8 +31,7 @@ class Instruction:
         """
         Marshalled response xml
         """
-        # TODO: Replace UUID type with str
-        self.request_id: UUID = request_id
+        self.request_id: str = request_id
         """
         Generated unique id, used to track the request
         """
@@ -65,7 +63,7 @@ class InstructionEncoder(JSONEncoder):
         obj_repr = {
             "request_data": o.request_data,
             "response": o.response,
-            "request_id": str(o.request_id),
+            "request_id": o.request_id,
             "queue_time": o.queue_time,
             "processing_start_time": o.processing_start_time,
             "execution_state": o.state.name
@@ -86,7 +84,7 @@ def instruction_decoder_object_hook(o: dict) -> Instruction:
     # Read values from dictionary, set default value if they don't exist
     request_data = o["request_data"]
     queue_time = o["queue_time"] if "queue_time" in o else time.time_ns()
-    request_id = UUID(o["request_id"]) if "request_id" in o else uuid4()
+    request_id = o["request_id"] if "request_id" in o else None
     # TODO parse response and processing_start_time
     state = ExecutionState.Queued
     if "execution_state" in o:

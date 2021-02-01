@@ -84,7 +84,7 @@ def create_i2b2_query():
     queue_insertion_time: int = time.time_ns()
     i2b2_request: str = request.data.decode("UTF-8")
     uuid: UUID = uuid4()
-    instruction: Instruction = Instruction(i2b2_request, uuid, queue_insertion_time)
+    instruction: Instruction = Instruction(i2b2_request, str(uuid), queue_insertion_time)
 
     # Create execution flag
     with open(instruction.file_path(), "x") as flag:
