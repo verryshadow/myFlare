@@ -77,7 +77,7 @@ class ThreadedWorker(Thread):
         """
         try:
             # Process instruction and build response
-            result_set: List[str] = process_request(self.instruction.request_data)
+            result_set: List[str] = process_request(self.instruction)
             x_response = build_response(result_set)
             self.insert_timestamps(x_response)
             response = ET.tostring(x_response).decode("UTF-8")
