@@ -96,7 +96,6 @@ def instruction_decoder_object_hook(o: dict) -> Instruction:
     request_data = o["request_data"]
     queue_time = o["queue_time"] if "queue_time" in o else time.time_ns()
     request_id = o["request_id"] if "request_id" in o else None
-    # TODO parse response and processing_start_time
     state = ExecutionState.Queued
     if "execution_state" in o:
         # Make sure state exists
