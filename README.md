@@ -1,6 +1,6 @@
-# i2b2 to FHIR pipeline
+# Flare
 
-A tool to execute i2b2 requests in FHIR
+A tool to execute CNF like structured queries in FHIR
 
 ## Goal
 the goal of this project is to provide an API that allows for execution of i2b2 queries on a FHIR-server
