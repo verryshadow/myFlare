@@ -3,7 +3,7 @@ from xml.etree.ElementTree import Element
 from argparse import ArgumentParser, Namespace
 
 from fhir import generate_fhir_cnf, get_patient_ids_from_bundle, build_result_set_from_query_results, execute_fhir_query
-from query.i2b2.i2b2_parser import parse_i2b2_query_xml_string
+from parser.i2b2.i2b2_parser import parse_i2b2_query_xml_string
 import timeit
 
 __debug = True

@@ -74,7 +74,7 @@ def handle_i2b2_query():
 
 
 @app.route("/query", methods=["POST"])
-def create_i2b2_query():
+def create_query():
     """
     Submit a query for execution
 
@@ -235,14 +235,14 @@ if __name__ == '__main__':
     parser.add_argument("--persistence", type=str, help="path to the folder in which queries should be persisted")
     parser.add_argument("--host", "-H", type=str, help="host on which to listen", default="localhost")
     parser.add_argument("--port", "-P", type=int, help="port on which to listen", default=5000)
-    parser.add_argument("--continue", action="store_true", dest="cont")
+    parser.add_argument("--continue", action="store_true", dest="continue_from_persistence")
     args = parser.parse_args()
 
     # Set application wide persistence folder
     if args.persistence:
         os.environ["PERSISTENCE"] = args.persistence
 
-    if args.cont:
+    if args.continue_from_persistence:
         refill_queue()
 
     # Start application
