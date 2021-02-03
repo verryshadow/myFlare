@@ -11,6 +11,7 @@ from uuid import uuid4, UUID
 import os.path
 from requests import RequestException
 
+from query_parser import content_type_to_query_syntax
 from worker import instruction_encoder, instruction_decoder
 from worker.communication.instruction import Instruction, get_request_file_path, ExecutionState
 from worker.communication.processing_event import ProcessingEvent
@@ -47,7 +48,7 @@ def handle_i2b2_query():
     start_time = time.time()
     i2b2_request = request.data.decode("UTF-8")
     try:
-        result_set = run(i2b2_request)
+        result_set = run(Instruction(i2b2_request, str(uuid4()), time.time_ns()))
         response = build_response(result_set, i2b2_request)
     except RequestException as e:
         return "Connection error with upstream FHIR server", 504
@@ -81,14 +82,15 @@ def create_query():
     :return: location header containing the url to the result/processing progress
     """
     # Extract data from Request
-    request_format = request.headers["Content-Type"]
+    content_type = request.headers["Content-Type"]
+    query_syntax = content_type_to_query_syntax(content_type)
     response_format = request.headers["Accept"]
     i2b2_request: str = request.data.decode("UTF-8")
 
     # Create Instruction
     queue_insertion_time: int = time.time_ns()
     uuid: UUID = uuid4()
-    instruction: Instruction = Instruction(i2b2_request, str(uuid), queue_insertion_time)
+    instruction: Instruction = Instruction(i2b2_request, str(uuid), queue_insertion_time, query_syntax=query_syntax)
 
     # Create execution flag
     with open(instruction.file_path(), "x") as flag:

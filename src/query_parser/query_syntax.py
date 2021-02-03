@@ -3,7 +3,7 @@ from enum import Enum
 from query_parser.codex.codex_parser import parse_codex_query_string
 from query_parser.i2b2.i2b2_parser import parse_i2b2_query_xml_string
 
-QuerySyntax = Enum("InputFormat", "CODEX I2B2")
+QuerySyntax = Enum("QuerySyntax", "CODEX I2B2")
 """
 An enum of all allowed syntaxes that a query can be in
 """
