@@ -1,0 +1,2 @@
+from worker.communication.instruction import Instruction
+from worker.communication.processing_event import ProcessingEvent

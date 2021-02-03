@@ -1,6 +1,6 @@
-import xml.etree.ElementTree as ET
-from typing import List
 import json
+import xml.etree.ElementTree as Etree
+from typing import List
 
 with open("query_parser/i2b2/mapping.json") as mapping:
     config = json.load(mapping)
@@ -9,7 +9,7 @@ with open("query_parser/i2b2/mapping.json") as mapping:
 def lookup(item_key: str) -> List[dict]:
     try:
         return config[item_key]
-    except KeyError as e:
+    except KeyError:
         if item_key.startswith("/meas/"):
             # assume measurement, assume last part is code
             code = item_key[item_key.rindex("/") + 1:]
@@ -19,7 +19,7 @@ def lookup(item_key: str) -> List[dict]:
 
 
 def parse_i2b2_query_xml_string(xml: str) -> List[List[dict]]:
-    root = ET.fromstring(xml)
+    root = Etree.fromstring(xml)
     panels = []
 
     # Iterate over panels
@@ -33,7 +33,7 @@ def parse_i2b2_query_xml_string(xml: str) -> List[List[dict]]:
     return panels
 
 
-def parse_panel(x_panel: ET.Element):
+def parse_panel(x_panel: Etree.Element):
     panel = []
 
     # Iterate over all items in the panel
@@ -48,7 +48,7 @@ def parse_panel(x_panel: ET.Element):
     return panel
 
 
-def parse_item(x_item: ET.Element, x_item_key: ET.Element):
+def parse_item(x_item: Etree.Element, x_item_key: Etree.Element):
     equivalents = lookup(x_item_key.text)
     for equivalent in equivalents:
         if "valueParam" in equivalent:

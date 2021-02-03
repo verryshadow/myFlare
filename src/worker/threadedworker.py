@@ -1,28 +1,28 @@
+import time
+import xml.etree.ElementTree as Etree
+from os import path
 from queue import Queue
 from threading import Thread
-import xml.etree.ElementTree as ET
-import time
 from typing import List, Optional
-from os import path
 
 from requests import RequestException
 
 from run import run as process_request
-from worker import Instruction, instruction_encoder
-from worker.communication.instruction import ExecutionState
+from worker.communication import Instruction
+from worker.communication.instruction import ExecutionState, instruction_encoder
 from worker.communication.processing_event import ProcessingEvent
 
 
-def build_response(result_set: List[str]) -> ET.Element:
+def build_response(result_set: List[str]) -> Etree.Element:
     # TODO: Add different response modes
-    x_result_set = ET.Element("resultSet")
-    x_result = ET.Element("patient_count")
+    x_result_set = Etree.Element("resultSet")
+    x_result = Etree.Element("patient_count")
     x_result.attrib["value"] = str(len(result_set))
     x_result_set.insert(0, x_result)
     return x_result_set
 
     #    for result in result_set:
-    #       x_result = ET.Element("result")
+    #       x_result = Etree.Element("result")
     #       x_result.attrib["value"] = result
     #       x_result_set.insert(0, x_result)
 
@@ -80,7 +80,7 @@ class ThreadedWorker(Thread):
             result_set: List[str] = process_request(self.instruction)
             x_response = build_response(result_set)
             self.insert_timestamps(x_response)
-            response = ET.tostring(x_response).decode("UTF-8")
+            response = Etree.tostring(x_response).decode("UTF-8")
 
             # Add response to instruction and persist instruction as done
             self.instruction.response = response
@@ -91,7 +91,7 @@ class ThreadedWorker(Thread):
             event = ProcessingEvent(time.time_ns(), str(self.instruction.request_id), self.instruction.state)
             self.event_queue.put(event)
 
-        except RequestException as e:
+        except RequestException:
             return "Connection error with upstream FHIR server", 504
 
     def insert_timestamps(self, x_response):
@@ -103,16 +103,16 @@ class ThreadedWorker(Thread):
         delta = end_time - self.instruction.processing_start_time
 
         # Create timestamp tags
-        x_start_time = ET.Element("start_time")
+        x_start_time = Etree.Element("start_time")
         x_start_time.attrib["value"] = str(self.instruction.processing_start_time)
 
-        x_queue_time = ET.Element("queue_time")
+        x_queue_time = Etree.Element("queue_time")
         x_queue_time.attrib["value"] = str(self.instruction.queue_time)
 
-        x_end_time = ET.Element("end_time")
+        x_end_time = Etree.Element("end_time")
         x_end_time.attrib["value"] = str(end_time)
 
-        x_delta = ET.Element("delta")
+        x_delta = Etree.Element("delta")
         x_delta.attrib["value"] = str(delta)
 
         # Insert timestamp tags into response

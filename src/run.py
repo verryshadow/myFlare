@@ -1,12 +1,13 @@
-from typing import List, Set, Optional
-from xml.etree.ElementTree import Element
-from argparse import ArgumentParser, Namespace
 import time
 import timeit
+from argparse import ArgumentParser, Namespace
+from typing import List, Set, Optional
+from xml.etree.ElementTree import Element
 
+from configuration.io_types import QuerySyntax
+from configuration.parser_configuration import syntax_parser_map
 from fhir import generate_fhir_cnf, get_patient_ids_from_bundle, build_result_set_from_query_results, execute_fhir_query
-from query_parser import QuerySyntax, syntax_parser_map
-from worker import Instruction
+from worker.communication import Instruction
 
 __debug = True
 
@@ -102,16 +103,16 @@ if __name__ == "__main__":
     parser = ArgumentParser(description="FLARE, run feasibility queries via standard HL7 FHIR search requests")
     parser.add_argument("query_file", type=str, help="path to the file containing the query")
 
-    # TODO Implement these options
+    # TODO Implement the mapping option
     parser.add_argument("--mapping", type=str, help="path to the file containing the i2b2 to FHIR mappings")
-    parser.add_argument("--syntax", type=str, choices=["I2B2", "CODEX"],
+    parser.add_argument("--syntax", type=str, choices=list(QuerySyntax),
                         help="detail which syntax the query is in, default is I2B2", default="I2B2")
     args = parser.parse_args()
 
     # Create instruction
     try:
         with open(args.query_file, 'r') as file:
-           ins = Instruction(file.read(), "local_request", time.time_ns(), query_syntax=QuerySyntax[args.syntax])
+            ins = Instruction(file.read(), "local_request", time.time_ns(), query_syntax=QuerySyntax[args.syntax])
     except IOError:
         print("Error reading the query file")
 
