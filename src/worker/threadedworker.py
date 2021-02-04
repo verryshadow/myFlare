@@ -63,6 +63,7 @@ class ThreadedWorker(Thread):
             # Setup instruction to process
             self.instruction.processing_start_time = time.time_ns()
             self.instruction.state = ExecutionState.Executing
+            self.persist_instruction()
 
             # Notify queue about event
             event = ProcessingEvent(time.time_ns(), str(self.instruction.request_id), self.instruction.state)

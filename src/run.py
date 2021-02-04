@@ -4,8 +4,10 @@ from argparse import ArgumentParser, Namespace
 from typing import List, Set, Optional
 from xml.etree.ElementTree import Element
 
+from algorithm import AlgorithmStep
 from configuration.io_types import QuerySyntax
 from configuration.parser_configuration import syntax_parser_map
+from configuration.process_configuration import response_algo_steps_map
 from fhir import generate_fhir_cnf, get_patient_ids_from_bundle, build_result_set_from_query_results, execute_fhir_query
 from worker.communication import Instruction
 
@@ -22,9 +24,15 @@ def run(instruction: Instruction) -> List[str]:
     :param instruction: The query which is to be executed against a FHIR Server
     :return: The resulting IDs that fit the query
     """
-    fhir_cnf = prepare_fhir_cnf(instruction.request_data, instruction.query_syntax)
-    fhir_cnf_responses = execute_fhir_queries(fhir_cnf)
-    result_set = build_result_set(fhir_cnf_responses)
+    algorithm: List[AlgorithmStep] = response_algo_steps_map[instruction.response_type]
+    for step in algorithm:
+        step.process(instruction)
+
+    result_set = instruction.algo_step
+
+    # fhir_cnf = prepare_fhir_cnf(instruction.request_data, instruction.query_syntax)
+    # fhir_cnf_responses = execute_fhir_queries(fhir_cnf)
+    # result_set = build_result_set(fhir_cnf_responses)
 
     print(f"\nresult_set_size:\n{len(result_set)}")
     print(f"result_set:\n{result_set}")

@@ -86,8 +86,8 @@ class InstructionEncoder(JSONEncoder):
             "queue_time": o.queue_time,
             "processing_start_time": o.processing_start_time,
             "execution_state": o.state.name,
-            "request_type": o.query_syntax.value,
-            "response_type": o.response_type.value
+            "request_type": o.query_syntax.name,
+            "response_type": o.response_type.name
         }
         return obj_repr
 
@@ -113,7 +113,7 @@ def instruction_decoder_object_hook(o: dict) -> Instruction:
             state = ExecutionState[o["execution_state"]]
     response = o["response"] if "response" in o else ""
     request_type = QuerySyntax[o["request_type"]] if "request_type" in o else QuerySyntax.I2B2
-    response_type = QuerySyntax[o["response_type"]] if "response_type" in o else ResponseType.RESULT
+    response_type = ResponseType[o["response_type"]] if "response_type" in o else ResponseType.RESULT
     processing_start_time = o["processing_start_time"] if "processing_start_time" in o else 0
 
     return Instruction(request_data, request_id, queue_time, state=state, processing_start_time=processing_start_time,
