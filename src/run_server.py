@@ -232,7 +232,7 @@ def refill_queue():
 
         # Decode instruction and skip finished ones
         instruction: Instruction = instruction_decoder.decode(open(f"{base_path}/{file}", "r").read())
-        if instruction.state == ExecutionState.Done:
+        if instruction.state == ExecutionState.DONE:
             continue
 
         instruction_queue.put(instruction)

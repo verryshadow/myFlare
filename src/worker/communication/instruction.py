@@ -6,9 +6,8 @@ from json.encoder import JSONEncoder
 
 from configuration.io_types import QuerySyntax, ResponseType
 
-# TODO: Replace Executing with query execution
-
-ExecutionState = Enum("ExecutionState", "Queued Executing ResultBuilding Aborted Done")
+ExecutionState = Enum("ExecutionState", "QUEUED EXECUTING PARSING MAPPING QUERYBUILDING FHIREXECUTION FHIRPARSING "
+                                        "AGGREGATING RESULTBUILDING ABORTED DONE")
 """
 Enum allowing Instruction to detail in which stage of execution it currently is
 """
@@ -16,7 +15,7 @@ Enum allowing Instruction to detail in which stage of execution it currently is
 
 class Instruction:
     def __init__(self, request_data: str, request_id: str, queue_time: int,
-                 state: ExecutionState = ExecutionState.Queued, processing_start_time: int = 0, response: str = "",
+                 state: ExecutionState = ExecutionState.QUEUED, processing_start_time: int = 0, response: str = "",
                  query_syntax: QuerySyntax = QuerySyntax.I2B2, response_type: ResponseType = ResponseType.RESULT):
         """
         Creates a new Instruction that can be processed by the worker thread by putting it in the queue
@@ -106,7 +105,7 @@ def instruction_decoder_object_hook(o: dict) -> Instruction:
     request_data = o["request_data"]
     queue_time = o["queue_time"] if "queue_time" in o else time.time_ns()
     request_id = o["request_id"] if "request_id" in o else None
-    state = ExecutionState.Queued
+    state = ExecutionState.QUEUED
     if "execution_state" in o:
         # Make sure state exists
         if o["execution_state"] in ExecutionState.__members__:

@@ -1,7 +1,6 @@
 import os
 from typing import List
 
-server_base_url = os.environ.get("FHIR_BASE_URL") or "http://localhost:5555/fhir"
 fhir_format = "_format=application/fhir+xml"
 
 
@@ -53,7 +52,7 @@ def generate_fhir_query(item: dict) -> str:
     :param item: dictionary describing an i2b2 item
     :return: Corresponding query url
     """
-    query = f'{server_base_url}/{item["res"]}?{get_param(item)}={get_code_and_sys(item)}'
+    query = f'{item["res"]}?{get_param(item)}={get_code_and_sys(item)}'
     if 'constrain_by_value' in item:
         # TODO: Handle value_unit_of_measure and other value_types than NUMBER
         query = f'{query}&{get_value_search_param(item["constrain_by_value"]["value_type"])}=' \

@@ -1,10 +1,18 @@
 from algorithm import AlgorithmStep
 from fhir import build_result_set_from_query_results
 from worker.communication import Instruction
+from worker.communication.instruction import ExecutionState
+from worker.communication.logging_callback import LoggingCallback, default_logger
 
 
 class ResolveCNFStep(AlgorithmStep):
-    def process(self, instruction: Instruction):
+    """
+    Resolves the CNF of IDs into the final list of IDs that match the query
+    """
+    def process(self, instruction: Instruction, callback: LoggingCallback = default_logger):
+        instruction.state = ExecutionState.AGGREGATING
+        default_logger.log_progress_event(instruction)
+
         result_set = build_result_set_from_query_results(instruction.algo_step)
         instruction.algo_step = result_set
         return

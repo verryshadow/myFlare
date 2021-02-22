@@ -1,9 +1,8 @@
 import time
-import xml.etree.ElementTree as Etree
 from os import path
 from queue import Queue
 from threading import Thread
-from typing import List, Optional
+from typing import Optional
 
 from requests import RequestException
 
@@ -11,20 +10,6 @@ from run import run as process_request
 from worker.communication import Instruction
 from worker.communication.instruction import ExecutionState, instruction_encoder
 from worker.communication.processing_event import ProcessingEvent
-
-
-def build_response(result_set: List[str]) -> Etree.Element:
-    # TODO: Add different response modes
-    x_result_set = Etree.Element("resultSet")
-    x_result = Etree.Element("patient_count")
-    x_result.attrib["value"] = str(len(result_set))
-    x_result_set.insert(0, x_result)
-    return x_result_set
-
-    #    for result in result_set:
-    #       x_result = Etree.Element("result")
-    #       x_result.attrib["value"] = result
-    #       x_result_set.insert(0, x_result)
 
 
 class ThreadedWorker(Thread):
@@ -62,11 +47,11 @@ class ThreadedWorker(Thread):
 
             # Setup instruction to process
             self.instruction.processing_start_time = time.time_ns()
-            self.instruction.state = ExecutionState.Executing
+            self.instruction.state = ExecutionState.EXECUTING
             self.persist_instruction()
 
             # Notify queue about event
-            event = ProcessingEvent(time.time_ns(), str(self.instruction.request_id), self.instruction.state)
+            event = ProcessingEvent(self.instruction)
             self.event_queue.put(event)
 
             # Process instruction
@@ -78,48 +63,19 @@ class ThreadedWorker(Thread):
         """
         try:
             # Process instruction and build response
-            result_set: List[str] = process_request(self.instruction)
-            x_response = build_response(result_set)
-            self.insert_timestamps(x_response)
-            response = Etree.tostring(x_response).decode("UTF-8")
+            response: str = process_request(self.instruction)
 
             # Add response to instruction and persist instruction as done
             self.instruction.response = response
-            self.instruction.state = ExecutionState.Done
+            self.instruction.state = ExecutionState.DONE
             self.persist_instruction()
 
             # Notify server about event
-            event = ProcessingEvent(time.time_ns(), str(self.instruction.request_id), self.instruction.state)
+            event = ProcessingEvent(self.instruction)
             self.event_queue.put(event)
 
         except RequestException:
             return "Connection error with upstream FHIR server", 504
-
-    def insert_timestamps(self, x_response):
-        """
-        Inserts start_time, queue_time, end_time and delta tags into the xml response
-        :param x_response: existing response to add the timestamps to
-        """
-        end_time = time.time()
-        delta = end_time - self.instruction.processing_start_time
-
-        # Create timestamp tags
-        x_start_time = Etree.Element("start_time")
-        x_start_time.attrib["value"] = str(self.instruction.processing_start_time)
-
-        x_queue_time = Etree.Element("queue_time")
-        x_queue_time.attrib["value"] = str(self.instruction.queue_time)
-
-        x_end_time = Etree.Element("end_time")
-        x_end_time.attrib["value"] = str(end_time)
-
-        x_delta = Etree.Element("delta")
-        x_delta.attrib["value"] = str(delta)
-
-        # Insert timestamp tags into response
-        x_response.insert(0, x_end_time)
-        x_response.insert(0, x_start_time)
-        x_response.insert(0, x_delta)
 
     def persist_instruction(self):
         """

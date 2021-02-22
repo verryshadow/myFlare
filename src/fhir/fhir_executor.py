@@ -3,12 +3,14 @@ from typing import List, Tuple, Optional
 
 import requests
 import urllib3
+import os
 from requests import Response
 
 from fhir.fhir_query_gen import fhir_format
 from fhir.namespace import ns
 
 urllib3.disable_warnings()
+server_base_url = os.environ.get("FHIR_BASE_URL") or "http://localhost:5555/fhir"
 
 
 # TODO: Create parallel requests with user config.
@@ -21,7 +23,7 @@ def execute_fhir_query(query: str) -> List[Etree.Element]:
     :return: List of FHIR-bundles in xml format returned by the FHIR server
     """
     ret = []
-    next_query = query
+    next_query = f'{server_base_url}/{query}'
 
     # Execute queries as long as there is a next page
     while next_query is not None:

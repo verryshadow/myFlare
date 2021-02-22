@@ -1,16 +1,18 @@
 from algorithm import AlgorithmStep
 from fhir import get_patient_ids_from_bundle
 from worker.communication import Instruction
+from worker.communication.instruction import ExecutionState
+from worker.communication.logging_callback import LoggingCallback, default_logger
 
 
 class ExtractFhirIdsStep(AlgorithmStep):
     """
     Replaces the FHIR-Bundles with a set of contained IDs
-
-    :param fhir_cnf_responses: FHIR-Responses in CNF format
-    :return: IDs contained in the FHIR-Bundles
     """
-    def process(self, instruction: Instruction):
+    def process(self, instruction: Instruction, callback: LoggingCallback = default_logger):
+        instruction.state = ExecutionState.FHIRPARSING
+        default_logger.log_progress_event(instruction)
+
         fhir_query_results = []
         for fhir_disjunction_response in instruction.algo_step:
             fhir_cnf_results = []
