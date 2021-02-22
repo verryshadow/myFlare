@@ -1,0 +1,36 @@
+version: "3.7"
+
+services:
+
+  flare:
+    ports:
+      - ${PORT_FLARE:-127.0.0.1:5000}:5000
+    environment:
+      FHIR_BASE_URL: ${FHIR_BASE_URL:-http://fhir-server:8080/fhir}
+    build: .
+    restart: always
+    volumes:
+      - ./src:/opt/flare/src
+
+  fhir-server:
+    image: ghcr.io/chgl/hapi/hapi-fhir-jpaserver-starter:5.2.0-distroless
+    restart: always
+    ports:
+      - ${PORT_HAPI_FHIR:-127.0.0.1:8081}:8080
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://db:5432/fhir?currentSchema=public"
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_DATASOURCE_DRIVERCLASSNAME: org.postgresql.Driver
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQL10Dialect
+      VALIDATION_REQUESTS_ENABLED: "false"
+      HAPI_FHIR_USE_APACHE_ADDRESS_STRATEGY: "true"
+    depends_on:
+      - db
+
+  db:
+    image: postgres:12.6-alpine
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: fhir

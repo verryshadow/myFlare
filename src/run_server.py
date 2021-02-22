@@ -165,10 +165,9 @@ def get_query(query_id: str):
     return query.request_data, 200
 
 
-@app.route("/query/", methods=["GET"])
-def list_queries():
-    # TODO implement this     os.listdir()
-    pass
+@app.route("/query", methods=["GET"])
+def list_queries():    
+    return "Not Implemented", 501
 
 
 @app.route("/query/<query_id>", methods=["DELETE"])
@@ -237,7 +236,7 @@ if __name__ == '__main__':
     # Setup the argument query_parser
     parser = ArgumentParser(description="FLARE, run feasibility queries via standard HL7 FHIR search requests")
     parser.add_argument("--persistence", type=str, help="path to the folder in which queries should be persisted")
-    parser.add_argument("--host", "-H", type=str, help="host on which to listen", default="localhost")
+    parser.add_argument("--host", "-H", type=str, help="host on which to listen", default="0.0.0.0")
     parser.add_argument("--port", "-P", type=int, help="port on which to listen", default=5000)
     parser.add_argument("--continue", action="store_true", dest="continue_from_persistence")
     args = parser.parse_args()
@@ -251,4 +250,4 @@ if __name__ == '__main__':
 
     # Start application
     worker.start()
-    app.run(args.host, args.port, threaded=True)
+    app.run(host=args.host, port=args.port, threaded=True, debug=False)
