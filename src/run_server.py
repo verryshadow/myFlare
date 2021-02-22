@@ -16,6 +16,7 @@ from worker.communication import Instruction
 from worker.communication.instruction import get_request_file_path, ExecutionState, instruction_encoder, \
     instruction_decoder
 from worker.communication.processing_event import ProcessingEvent
+from worker.queue_distributor import QueueDistributor
 from worker.threadedworker import ThreadedWorker
 from run import run
 
@@ -24,7 +25,10 @@ app = Flask(__name__)
 # Setup worker thread
 instruction_queue: 'Queue[Instruction]' = Queue()
 event_queue: 'Queue[ProcessingEvent]' = Queue()
-worker = ThreadedWorker(instruction_queue, event_queue)
+queue_consumers: 'list[Queue[ProcessingEvent]]' = []
+
+worker_thread = ThreadedWorker(instruction_queue, event_queue)
+event_distributor_thread = QueueDistributor(event_queue, queue_consumers)
 
 
 def build_response(result_set):
@@ -195,16 +199,18 @@ def delete_query(query_id: str):
 
 
 def send_events():
+    consumer_queue = Queue()
+    queue_consumers.append(consumer_queue)
     try:
         while True:
             try:
-                yield json.dumps(event_queue.get(block=True).__dict__).encode("UTF-8")
+                yield json.dumps(consumer_queue.get(block=True).__dict__).encode("UTF-8")
             except Empty:
                 pass
     # Catch user terminating connection
     except GeneratorExit:
         # FIXME: somehow only gets thrown when attempting to write to an already closed connection
-        pass
+        queue_consumers.remove(consumer_queue)
 
 
 @app.route('/subscribe', methods=["GET"])
@@ -279,5 +285,6 @@ if __name__ == '__main__':
         refill_queue()
 
     # Start application
-    worker.start()
+    worker_thread.start()
+    event_distributor_thread.start()
     app.run(args.host, args.port, threaded=True)

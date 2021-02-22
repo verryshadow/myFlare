@@ -9,17 +9,11 @@ from worker.communication.logging_callback import LoggingCallback, default_logge
 
 
 def build_response(result_set: List[str]) -> Etree.Element:
-    # TODO: Add different response modes
     x_result_set = Etree.Element("resultSet")
     x_result = Etree.Element("patient_count")
     x_result.attrib["value"] = str(len(result_set))
     x_result_set.insert(0, x_result)
     return x_result_set
-
-    #    for result in result_set:
-    #       x_result = Etree.Element("result")
-    #       x_result.attrib["value"] = result
-    #       x_result_set.insert(0, x_result)
 
 
 def insert_timestamps(x_response, instruction):
