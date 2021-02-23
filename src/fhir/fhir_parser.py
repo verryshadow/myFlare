@@ -1,9 +1,10 @@
+import xml.etree.ElementTree as Etree
 from typing import List, Set
-import xml.etree.ElementTree as ET
+
 from fhir.namespace import ns
 
 
-def get_patient_ids_from_bundle(bundle: ET.Element) -> Set[str]:
+def get_patient_ids_from_bundle(bundle: Etree.Element) -> Set[str]:
     """
     Extracts all patient ids from the entities contained in a bundle
 
@@ -21,7 +22,7 @@ def get_patient_ids_from_bundle(bundle: ET.Element) -> Set[str]:
     return ids
 
 
-def _get_resource_type(x_resource: ET.Element) -> str:
+def _get_resource_type(x_resource: Etree.Element) -> str:
     """
     Retrieves the entity type (patient, observation ...) from a resource
 
@@ -38,30 +39,30 @@ def _get_resource_type(x_resource: ET.Element) -> str:
     return tag.lower()
 
 
-def _extract_id_from_patient(patient: ET.Element) -> str:
+def _extract_id_from_patient(patient: Etree.Element) -> str:
     x_id = patient.find("./ns0:id", ns)
 
     if x_id is None:
         x_identifier = patient.find("./ns0:identifier", ns)
         x_identifier_value = x_identifier.find("./ns0:value", ns)
-        iD = x_identifier_value.attrib["value"]
+        x_id_value = x_identifier_value.attrib["value"]
     else:
-        iD = x_id.attrib["value"]
-    return iD
+        x_id_value = x_id.attrib["value"]
+    return x_id_value
 
 
-def _extract_id_from_observation(observation: ET.Element) -> str:
+def _extract_id_from_observation(observation: Etree.Element) -> str:
     x_identifier = observation.find(".ns0:subject/ns0:identifier", ns)
     x_identifier_value = x_identifier.find("./ns0:value", ns)
     return x_identifier_value.attrib["value"]
 
 
-def _extract_id_from_encounter(encounter: ET.Element) -> str:
+def _extract_id_from_encounter(encounter: Etree.Element) -> str:
     # TODO implement
     pass
 
 
-def _split_bundle(bundle: ET.Element) -> List[ET.Element]:
+def _split_bundle(bundle: Etree.Element) -> List[Etree.Element]:
     """
     Split the bundle and return all entry tags in the bundle
 
@@ -72,7 +73,7 @@ def _split_bundle(bundle: ET.Element) -> List[ET.Element]:
     return entries
 
 
-def _extract_resource_from_entry(entry: ET.Element) -> ET.Element:
+def _extract_resource_from_entry(entry: Etree.Element) -> Etree.Element:
     """
     :param entry: <entry></entry>
     :return: the element found inside the <resource></resource> in the entry

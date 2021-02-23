@@ -1,19 +1,21 @@
+import xml.etree.ElementTree as Etree
 from typing import List, Tuple, Optional
 
-import xml.etree.ElementTree as ET
+import requests
+import urllib3
+import os
+from requests import Response
+
 from fhir.fhir_query_gen import fhir_format
 from fhir.namespace import ns
 
-import requests
-from requests import Response
-import urllib3
-
 urllib3.disable_warnings()
+server_base_url = os.environ.get("FHIR_BASE_URL") or "http://localhost:5555/fhir"
 
 
 # TODO: Create parallel requests with user config.
 #  Check whether this may slow down the process due to FHIR-server performance beforehand
-def execute_fhir_query(query: str) -> List[ET.Element]:
+def execute_fhir_query(query: str) -> List[Etree.Element]:
     """
     Executes a FHIR query, fetches all pages
 
@@ -21,7 +23,7 @@ def execute_fhir_query(query: str) -> List[ET.Element]:
     :return: List of FHIR-bundles in xml format returned by the FHIR server
     """
     ret = []
-    next_query = query
+    next_query = f'{server_base_url}/{query}'
 
     # Execute queries as long as there is a next page
     while next_query is not None:
@@ -32,7 +34,7 @@ def execute_fhir_query(query: str) -> List[ET.Element]:
     return ret
 
 
-def _execute_single_query(paged_query_url: str) -> Tuple[Optional[str], ET.Element]:
+def _execute_single_query(paged_query_url: str) -> Tuple[Optional[str], Etree.Element]:
     """
     Executes a single FHIR query and attempts to extract the URL to the next page
 
@@ -44,11 +46,11 @@ def _execute_single_query(paged_query_url: str) -> Tuple[Optional[str], ET.Eleme
     if response.status_code != 200:
         raise RequestUnsuccessfulError(response, f"failed request on url: {paged_query_url}")
 
-    x_response = ET.fromstring(response.text)
+    x_response = Etree.fromstring(response.text)
     return get_next_page_url(x_response), x_response
 
 
-def get_next_page_url(x_response: ET.Element) -> Optional[str]:
+def get_next_page_url(x_response: Etree.Element) -> Optional[str]:
     """
     Fetch URL to the next page from a given response
 
@@ -97,5 +99,5 @@ def persist_query_response(x_response):
     """
     global persistence_index
     with open(f"../FHIR/fhir_responses/{persistence_index}.xml", "w", encoding="UTF-8") as persistence_file:
-        persistence_file.writelines(ET.tostring(x_response).decode("UTF-8"))
+        persistence_file.writelines(Etree.tostring(x_response).decode("UTF-8"))
     persistence_index = persistence_index + 1

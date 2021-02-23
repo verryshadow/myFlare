@@ -1,43 +1,49 @@
 import json
 import os
+import os.path
 import time
 from argparse import ArgumentParser
 from queue import Queue, Empty
 from typing import Optional
+from uuid import uuid4, UUID
+from xml.etree import ElementTree as Etree
 
 from flask import Flask as Flask, request, Response
-from uuid import uuid4, UUID
-
-import os.path
 from requests import RequestException
 
-from worker import instruction_encoder, instruction_decoder
-from worker.communication.instruction import Instruction, get_request_file_path, ExecutionState
+from configuration.io_types import QuerySyntax, ResponseType
+from worker.communication import Instruction
+from worker.communication.instruction import get_request_file_path, ExecutionState, instruction_encoder, \
+    instruction_decoder
 from worker.communication.processing_event import ProcessingEvent
+from worker.queue_distributor import QueueDistributor
 from worker.threadedworker import ThreadedWorker
 from run import run
-from xml.etree import ElementTree as ET
 
 app = Flask(__name__)
 
 # Setup worker thread
 instruction_queue: 'Queue[Instruction]' = Queue()
 event_queue: 'Queue[ProcessingEvent]' = Queue()
-worker = ThreadedWorker(instruction_queue, event_queue)
+queue_consumers: 'list[Queue[ProcessingEvent]]' = []
+
+worker_thread = ThreadedWorker(instruction_queue, event_queue)
+event_distributor_thread = QueueDistributor(event_queue, queue_consumers)
 
 
-def build_response(result_set, i2b2_request):
-    x_result_set = ET.Element("resultSet")
-    x_result = ET.Element("patient_count")
+def build_response(result_set):
+    x_result_set = Etree.Element("resultSet")
+    x_result = Etree.Element("patient_count")
     x_result.attrib["value"] = str(len(result_set))
     x_result_set.insert(0, x_result)
     return x_result_set
 
 
+@DeprecationWarning
 @app.route("/i2b2", methods=["POST"])
 def handle_i2b2_query():
     """
-    Synchronous execution API
+    Synchronous execution API (legacy)
 
     takes an I2B2 Query Definition in the body and executes it.
     :return: the number of matching patients found
@@ -47,28 +53,28 @@ def handle_i2b2_query():
     start_time = time.time()
     i2b2_request = request.data.decode("UTF-8")
     try:
-        result_set = run(i2b2_request)
-        response = build_response(result_set, i2b2_request)
-    except RequestException as e:
+        result_set = run(Instruction(i2b2_request, str(uuid4()), time.time_ns()))
+        response = build_response(result_set)
+    except RequestException:
         return "Connection error with upstream FHIR server", 504
 
     end_time = time.time()
     delta = end_time - start_time
 
     # Insert timestamps into result_set
-    x_start_time = ET.Element("start_time")
+    x_start_time = Etree.Element("start_time")
     x_start_time.attrib["value"] = str(start_time)
 
-    x_end_time = ET.Element("end_time")
+    x_end_time = Etree.Element("end_time")
     x_end_time.attrib["value"] = str(end_time)
 
-    x_delta = ET.Element("delta")
+    x_delta = Etree.Element("delta")
     x_delta.attrib["value"] = str(delta)
 
     response.insert(0, x_end_time)
     response.insert(0, x_start_time)
     response.insert(0, x_delta)
-    response = ET.tostring(response).decode("UTF-8")
+    response = Etree.tostring(response).decode("UTF-8")
 
     return str(response)
 
@@ -81,14 +87,17 @@ def create_query():
     :return: location header containing the url to the result/processing progress
     """
     # Extract data from Request
-    request_format = request.headers["Content-Type"]
-    response_format = request.headers["Accept"]
+    content_type = request.headers["Content-Type"]
+    query_syntax = content_type_to_query_syntax(content_type)
+    accept = request.headers["Accept"]
+    response_type = accept_to_response_type(accept)
     i2b2_request: str = request.data.decode("UTF-8")
 
     # Create Instruction
     queue_insertion_time: int = time.time_ns()
     uuid: UUID = uuid4()
-    instruction: Instruction = Instruction(i2b2_request, str(uuid), queue_insertion_time)
+    instruction: Instruction = Instruction(i2b2_request, str(uuid), queue_insertion_time,
+                                           query_syntax=query_syntax, response_type=response_type)
 
     # Create execution flag
     with open(instruction.file_path(), "x") as flag:
@@ -189,16 +198,18 @@ def delete_query(query_id: str):
 
 
 def send_events():
+    consumer_queue = Queue()
+    queue_consumers.append(consumer_queue)
     try:
         while True:
             try:
-                yield json.dumps(event_queue.get(block=True).__dict__).encode("UTF-8")
+                yield json.dumps(consumer_queue.get(block=True).__dict__).encode("UTF-8")
             except Empty:
                 pass
     # Catch user terminating connection
     except GeneratorExit:
         # FIXME: somehow only gets thrown when attempting to write to an already closed connection
-        pass
+        queue_consumers.remove(consumer_queue)
 
 
 @app.route('/subscribe', methods=["GET"])
@@ -226,10 +237,34 @@ def refill_queue():
 
         # Decode instruction and skip finished ones
         instruction: Instruction = instruction_decoder.decode(open(f"{base_path}/{file}", "r").read())
-        if instruction.state == ExecutionState.Done:
+        if instruction.state == ExecutionState.DONE:
             continue
 
         instruction_queue.put(instruction)
+
+
+def content_type_to_query_syntax(content_type: str) -> QuerySyntax:
+    """
+    For a given Content-Type header fetch the corresponding QuerySyntax
+
+    :param content_type: string given in the header, values being e.g. codex/json or i2b2/xml
+    :return: enum representing the input format
+    """
+    # Get first part of media-type in uppercase, split of charset, boundary and
+    content_type = content_type.split(";")[0].split("/")[0].upper()
+    return QuerySyntax[content_type]
+
+
+def accept_to_response_type(accept: str) -> ResponseType:
+    """
+    For a given Accept header fetch the corresponding ResponseType
+
+    :param accept: string given in the header, values being e.g. response/xml or internal/json
+    :return: enum representing the response type
+    """
+    # Get first part of media-type in uppercase, split of charset, boundary and
+    accept = accept.split(";")[0].split("/")[0].upper()
+    return ResponseType[accept]
 
 
 if __name__ == '__main__':
@@ -249,5 +284,7 @@ if __name__ == '__main__':
         refill_queue()
 
     # Start application
-    worker.start()
+    worker_thread.start()
+    event_distributor_thread.start()
     app.run(host=args.host, port=args.port, threaded=True, debug=False)
+

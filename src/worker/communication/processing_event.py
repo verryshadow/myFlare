@@ -1,8 +1,10 @@
-from worker.communication.instruction import ExecutionState
+from worker.communication import Instruction
+import time
 
 
 class ProcessingEvent:
-    def __init__(self, timestamp_ns: int, instruction_id: str, state: ExecutionState):
-        self.timestamp_ns: int = timestamp_ns
-        self.instruction_id: str = instruction_id
-        self.state: str = state.name
+    def __init__(self, instruction: Instruction, information: str = None):
+        self.timestamp_ns: int = time.time_ns()
+        self.instruction_id: str = instruction.request_id
+        self.state: str = instruction.state.name
+        self.information: str = information
