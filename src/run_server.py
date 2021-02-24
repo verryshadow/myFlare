@@ -286,5 +286,5 @@ if __name__ == '__main__':
     # Start application
     worker_thread.start()
     event_distributor_thread.start()
-    app.run(host=args.host, port=args.port, threaded=True, debug=False)
+    app.run(host=args.host, port=args.port, threaded=True, debug=True)
 
