@@ -15,5 +15,5 @@ If you would like to load your own testdata into the test FHIR server, add your 
 ## Running a test query
 
 ```bash
-curl -X POST --data @src/query_parse/i2b2/i2b2_gecco_demo.xml -H "Content-type: i2b2/xml" -H "Accept: internal/xml" http://localhost:5000/query
+curl -X POST --data @src/query_parser/i2b2/i2b2_gecco_demo.xml -H "Content-type: i2b2/xml" -H "Accept: internal/xml" http://localhost:5000/query
 ```
