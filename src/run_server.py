@@ -108,7 +108,7 @@ def create_query():
 
     # Respond with location header
     response = app.make_response("")
-    response.status_code = 201
+    response.status_code = 202
     response.headers["Location"] = f"/query/{str(instruction.request_id)}"
     return response
 
@@ -155,6 +155,9 @@ def handle_query_result(query_id: str):
     query = get_query_from_persistence(query_id)
     if query is None:
         return "No Query under this id", 404
+
+    if query.state != ExecutionState.DONE:
+        return "Still processing", 102
 
     return query.response
 
@@ -259,7 +262,7 @@ def accept_to_response_type(accept: str) -> ResponseType:
     """
     For a given Accept header fetch the corresponding ResponseType
 
-    :param accept: string given in the header, values being e.g. response/xml or internal/json
+    :param accept: string given in the header, values being e.g. result/xml or internal/json
     :return: enum representing the response type
     """
     # Get first part of media-type in uppercase, split of charset, boundary and
