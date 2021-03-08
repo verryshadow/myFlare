@@ -11,16 +11,16 @@ class ExecuteFhirQueriesStep(AlgorithmStep):
     """
     Executes the FHIR Queries and yields the raw XML responses
     """
-    def process(self, instruction: Instruction, callback: LoggingCallback = default_logger):
+    def process(self, instruction: Instruction, data: any, callback: LoggingCallback = default_logger):
         # Count number of queries and log the beginning of the execution
         instruction.state = ExecutionState.FHIREXECUTION
-        query_count: int = count(instruction.algo_step)
+        query_count: int = count(data)
         executed_counter: int = 0
         callback.log_progress_event(instruction, information=f"{executed_counter}/{query_count}")
 
         # Iterate through CNF and execute one by one
         fhir_cnf_responses = []
-        for fhir_disjunction in instruction.algo_step:
+        for fhir_disjunction in data:
             fhir_disjunction_res = []
             for query in fhir_disjunction:
                 # Execute and put into disjunction list
@@ -32,8 +32,7 @@ class ExecuteFhirQueriesStep(AlgorithmStep):
                 callback.log_progress_event(instruction, information=f"{executed_counter}/{query_count}")
             # Add results of disjunction into the cnf list
             fhir_cnf_responses.append(fhir_disjunction_res)
-        instruction.algo_step = fhir_cnf_responses
-        return
+        return fhir_cnf_responses
 
 
 def count(nested_list) -> int:

@@ -4,8 +4,10 @@ from typing import List, Optional
 
 from algorithm import AlgorithmStep
 from configuration.io_types import QuerySyntax, ResponseType
+from configuration.parser_configuration import syntax_parser_map
 from configuration.process_configuration import response_algo_steps_map
 from worker.communication import Instruction
+from worker.communication.instruction import ExecutionState
 from worker.communication.logging_callback import default_logger
 
 __debug = True
@@ -23,13 +25,35 @@ def run(instruction: Instruction) -> str:
     """
 
     logger = default_logger
-    algorithm: List[AlgorithmStep] = response_algo_steps_map[instruction.response_type]
-    for step in algorithm:
-        step.process(instruction, logger)
-    response = instruction.algo_step
 
+    algorithm: List[AlgorithmStep] = response_algo_steps_map[instruction.response_type].steps
+    parsed_input = parse_input(instruction)
+    processed_inclusion_criterions: List[List] = []
+    for inclusion_criterion in parsed_input:
+        for step in algorithm:
+            inclusion_criterion = step.process(instruction, inclusion_criterion, logger)
+        processed_inclusion_criterions.append(inclusion_criterion)
+
+    if instruction.response_type is not ResponseType.INTERNAL and len(processed_inclusion_criterions) > 1:
+        result_set = set(processed_inclusion_criterions[0])
+        excluded_set = set.intersection(*[set(processed_inclusion_criterion) for processed_inclusion_criterion in
+                                          processed_inclusion_criterions[1:]])
+        result_set -= set(excluded_set)
+        result_set = list(result_set)
+    else:
+        result_set = processed_inclusion_criterions[0]
+    response = response_algo_steps_map[instruction.response_type].response_step.process(instruction, result_set, logger)
     logger.result(response)
     return response
+
+
+def parse_input(instruction: Instruction) -> List[List[List[dict]]]:
+    instruction.state = ExecutionState.PARSING
+    default_logger.log_progress_event(instruction, information=instruction.query_syntax.name)
+
+    intermediate_query_repr: List[List[List[dict]]] = \
+        syntax_parser_map[instruction.query_syntax](instruction.request_data)
+    return intermediate_query_repr
 
 
 if __name__ == "__main__":

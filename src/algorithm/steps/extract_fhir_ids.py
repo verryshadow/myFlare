@@ -9,12 +9,12 @@ class ExtractFhirIdsStep(AlgorithmStep):
     """
     Replaces the FHIR-Bundles with a set of contained IDs
     """
-    def process(self, instruction: Instruction, callback: LoggingCallback = default_logger):
+    def process(self, instruction: Instruction, data: any, callback: LoggingCallback = default_logger):
         instruction.state = ExecutionState.FHIRPARSING
         default_logger.log_progress_event(instruction)
 
         fhir_query_results = []
-        for fhir_disjunction_response in instruction.algo_step:
+        for fhir_disjunction_response in data:
             fhir_cnf_results = []
             for fhir_paged_responses in fhir_disjunction_response:
                 page_ids = []
@@ -23,5 +23,4 @@ class ExtractFhirIdsStep(AlgorithmStep):
                     page_ids.append(patient_ids)
                 fhir_cnf_results.append(page_ids)
             fhir_query_results.append(fhir_cnf_results)
-        instruction.algo_step = fhir_query_results
-        return
+        return fhir_query_results

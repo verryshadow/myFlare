@@ -18,7 +18,7 @@ def lookup(item_key: str) -> List[dict]:
             return []
 
 
-def parse_i2b2_query_xml_string(xml: str) -> List[List[dict]]:
+def parse_i2b2_query_xml_string(xml: str) -> List[List[List[dict]]]:
     root = Etree.fromstring(xml)
     panels = []
 
@@ -30,7 +30,7 @@ def parse_i2b2_query_xml_string(xml: str) -> List[List[dict]]:
         if not panel == []:
             panels.append(panel)
 
-    return panels
+    return [panels]
 
 
 def parse_panel(x_panel: Etree.Element):
@@ -75,7 +75,7 @@ def parse_value_constraints(equivalent, x_constrain_by_value):
         constrain_by_value["value_constraint"] = x_value_constraint.text
     if x_value_unit_of_measure is not None:
         constrain_by_value["value_unit_of_measure"] = x_value_unit_of_measure.text
-    equivalent["constrain_by_value"] = constrain_by_value
+    equivalent["constrain"] = constrain_by_value
 
 
 def main():

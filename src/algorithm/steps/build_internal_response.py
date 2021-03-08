@@ -11,8 +11,7 @@ class BuildInternalResponseStep(AlgorithmStep):
     """
     Builds response of type ResponseType.INTERNAL
     """
-    def process(self, instruction: Instruction, callback: LoggingCallback = default_logger):
+    def process(self, instruction: Instruction, data: any, callback: LoggingCallback = default_logger):
         instruction.state = ExecutionState.RESULTBUILDING
         default_logger.log_progress_event(instruction, information=instruction.response_type.name)
-        instruction.algo_step = json.dumps(instruction.algo_step)
-        return
+        return json.dumps(data)

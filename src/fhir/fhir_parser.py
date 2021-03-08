@@ -106,7 +106,8 @@ def build_result_set_from_query_results(fhir_query_results: List[List[List[Set[s
         for fhir_disjunction_results in fhir_cnf_results:
             # Items are translated into one FHIR-query, an executed FHIR-query consists of pages, build union of it
             items.append(set.union(*fhir_disjunction_results))
-        panels.append(set.union(*items))
+        if len(items) != 0:
+            panels.append(set.union(*items))
     if len(panels) == 0:
         return []
     return list(set.intersection(*panels))

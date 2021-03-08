@@ -47,12 +47,12 @@ class BuildXmlResponseStep(AlgorithmStep):
     """
     Builds response of type ResponseType.RESULT
     """
-    def process(self, instruction: Instruction, callback: LoggingCallback = default_logger):
+    def process(self, instruction: Instruction, data: any, callback: LoggingCallback = default_logger):
         instruction.state = ExecutionState.RESULTBUILDING
         default_logger.log_progress_event(instruction, information=instruction.response_type.name)
 
-        result_set = instruction.algo_step
+        result_set = data
         x_response = build_response(result_set)
         insert_timestamps(x_response, instruction)
         response = Etree.tostring(x_response).decode("UTF-8")
-        instruction.algo_step = response
+        return response

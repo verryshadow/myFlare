@@ -11,12 +11,9 @@ class GenerateFhirCNFStep(AlgorithmStep):
     """
     Generates FHIR Query strings
     """
-    def process(self, instruction: Instruction, callback: LoggingCallback = default_logger):
-        if not instruction.algo_step or type(instruction.algo_step) == List[List[dict]]:
-            raise Exception("Executed the FHIR CNF generation without prerequisites having been met")
-
+    def process(self, instruction: Instruction, data: any, callback: LoggingCallback = default_logger):
         instruction.state = ExecutionState.QUERYBUILDING
         default_logger.log_progress_event(instruction)
 
-        instruction.algo_step = generate_fhir_cnf(instruction.algo_step)
+        return generate_fhir_cnf(data)
 

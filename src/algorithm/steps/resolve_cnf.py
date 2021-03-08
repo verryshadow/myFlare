@@ -9,10 +9,9 @@ class ResolveCNFStep(AlgorithmStep):
     """
     Resolves the CNF of IDs into the final list of IDs that match the query
     """
-    def process(self, instruction: Instruction, callback: LoggingCallback = default_logger):
+    def process(self, instruction: Instruction, data: any, callback: LoggingCallback = default_logger):
         instruction.state = ExecutionState.AGGREGATING
         default_logger.log_progress_event(instruction)
 
-        result_set = build_result_set_from_query_results(instruction.algo_step)
-        instruction.algo_step = result_set
-        return
+        result_set = build_result_set_from_query_results(data)
+        return result_set

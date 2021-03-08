@@ -61,10 +61,6 @@ class Instruction:
         """
         Type of response expected by the requesting party
         """
-        self.algo_step: any = None
-        """
-        Temporarily holds the algorithms progress, not to be persisted
-        """
 
     def file_path(self) -> str:
         """
