@@ -17,7 +17,9 @@ def get_patient_ids_from_bundle(bundle: Etree.Element) -> Set[str]:
         resource = _extract_resource_from_entry(entry)
         resource_type = _get_resource_type(resource)
         id_extractor = _resource_to_extractor_mapping[resource_type]
-        ids = ids.union([id_extractor(resource)])
+        extracted_id = id_extractor(resource)
+        if extracted_id:
+            ids = ids.union([extracted_id])
 
     return ids
 
@@ -52,9 +54,23 @@ def _extract_id_from_patient(patient: Etree.Element) -> str:
 
 
 def _extract_id_from_observation(observation: Etree.Element) -> str:
-    x_identifier = observation.find(".ns0:subject/ns0:identifier", ns)
-    x_identifier_value = x_identifier.find("./ns0:value", ns)
-    return x_identifier_value.attrib["value"]
+    # get reference https://www.hl7.org/fhir/references.html#Reference
+    x_reference_element = observation.find(".ns0:subject", ns)
+
+    # Extract all tags possibly containing values
+    x_identifier = x_reference_element.find("./ns0:identifier", ns)
+    x_reference = x_reference_element.find("./ns0:reference", ns)
+    x_type = x_reference_element.find("./ns0:type", ns)
+
+    patient_id = None
+    if x_identifier is not None:
+        x_value = x_identifier.find("./ns0:value", ns)
+        patient_id = x_value.attrib["value"]
+    # TODO: Proper reference handling by executing FHIR query
+    elif x_reference is not None:
+        patient_id = x_reference.attrib["value"].split("/")[-1]
+
+    return patient_id
 
 
 def _extract_id_from_encounter(encounter: Etree.Element) -> str:

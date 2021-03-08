@@ -1,4 +1,5 @@
 import os
+import pathlib
 import time
 from enum import Enum
 from json import JSONDecoder
@@ -126,7 +127,9 @@ Decodes JSON into Instructions
 
 
 def get_request_file_path(request_id: str):
-    base_path = os.environ.get('PERSISTENCE') or "worker/requests"
+    base_path = os.environ.get('PERSISTENCE') or "./worker/requests"
+    pathlib.Path(base_path).mkdir(parents=True, exist_ok=True)
+
     return f"{base_path}/{request_id}.json"
 
 

@@ -108,7 +108,7 @@ def create_query():
 
     # Respond with location header
     response = app.make_response("")
-    response.status_code = 201
+    response.status_code = 202
     response.headers["Location"] = f"/query/{str(instruction.request_id)}"
     return response
 
@@ -156,6 +156,9 @@ def handle_query_result(query_id: str):
     if query is None:
         return "No Query under this id", 404
 
+    if query.state != ExecutionState.DONE:
+        return "Still processing", 102
+
     return query.response
 
 
@@ -174,10 +177,9 @@ def get_query(query_id: str):
     return query.request_data, 200
 
 
-@app.route("/query/", methods=["GET"])
-def list_queries():
-    # TODO implement this     os.listdir()
-    pass
+@app.route("/query", methods=["GET"])
+def list_queries():    
+    return "Not Implemented", 501
 
 
 @app.route("/query/<query_id>", methods=["DELETE"])
@@ -260,7 +262,7 @@ def accept_to_response_type(accept: str) -> ResponseType:
     """
     For a given Accept header fetch the corresponding ResponseType
 
-    :param accept: string given in the header, values being e.g. response/xml or internal/json
+    :param accept: string given in the header, values being e.g. result/xml or internal/json
     :return: enum representing the response type
     """
     # Get first part of media-type in uppercase, split of charset, boundary and
@@ -272,7 +274,7 @@ if __name__ == '__main__':
     # Setup the argument query_parser
     parser = ArgumentParser(description="FLARE, run feasibility queries via standard HL7 FHIR search requests")
     parser.add_argument("--persistence", type=str, help="path to the folder in which queries should be persisted")
-    parser.add_argument("--host", "-H", type=str, help="host on which to listen", default="localhost")
+    parser.add_argument("--host", "-H", type=str, help="host on which to listen", default="0.0.0.0")
     parser.add_argument("--port", "-P", type=int, help="port on which to listen", default=5000)
     parser.add_argument("--continue", action="store_true", dest="continue_from_persistence")
     args = parser.parse_args()
@@ -287,4 +289,5 @@ if __name__ == '__main__':
     # Start application
     worker_thread.start()
     event_distributor_thread.start()
-    app.run(args.host, args.port, threaded=True)
+    app.run(host=args.host, port=args.port, threaded=True, debug=True)
+

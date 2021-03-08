@@ -149,5 +149,13 @@
       "code": "I_COVAS_COV_M030_LAB_PARA_Q200",
       "valueParam": "value-quantity"
     }
+  ],
+  "\\\\GECCO_DEMO\\Observation\\BloodOxygen": [
+    {
+      "res": "Observation",
+      "param": "code",
+      "sys": "",
+      "code": "3150-0"
+    }
   ]
 }

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<request>
+    <query_definition>
+        <query_name>Male-Admit D@12:58:34</query_name>
+        <query_timing>ANY</query_timing>
+        <specificity_scale>0</specificity_scale>
+        <panel>
+            <panel_number>2</panel_number>
+            <panel_accuracy_scale>100</panel_accuracy_scale>
+            <invert>0</invert>
+            <panel_timing>ANY</panel_timing>
+            <total_item_occurrences>1</total_item_occurrences>
+            <item>
+                <hlevel>2</hlevel>
+                <item_key>\\GECCO_DEMO\Observation\BloodOxygen</item_key>
+                <item_name>Blood Oxygen</item_name>
+                <tooltip>tooltip</tooltip>
+                <item_icon>FA</item_icon>
+                <class>ENC</class>
+                <constrain_by_value>
+                    <value_type>NUMBER</value_type>
+                    <value_unit_of_measure>%</value_unit_of_measure>
+                    <value_operator>LT</value_operator>
+                    <value_constraint>90</value_constraint>
+                </constrain_by_value>
+                <item_is_synonym>false</item_is_synonym>
+            </item>
+        </panel>
+    </query_definition>
+    <result_output_list>
+        <result_output priority_index="9" name="patient_count_xml"/>
+    </result_output_list>
+
+</request>
