@@ -39,23 +39,26 @@ class ThreadedWorker(Thread):
     # TODO: implement graceful shutdown
     def run(self):
         while True:
-            # Wait for main thread to add instruction to queue
-            self.instruction = self.instruction_queue.get(block=True, timeout=None)
-            # Skip removed instructions since they cannot be deleted from the Queue
-            if self.current_instruction_deleted():
-                continue
+            try:
+                # Wait for main thread to add instruction to queue
+                self.instruction = self.instruction_queue.get(block=True, timeout=None)
+                # Skip removed instructions since they cannot be deleted from the Queue
+                if self.current_instruction_deleted():
+                    continue
 
-            # Setup instruction to process
-            self.instruction.processing_start_time = time.time_ns()
-            self.instruction.state = ExecutionState.EXECUTING
-            self.persist_instruction()
+                # Setup instruction to process
+                self.instruction.processing_start_time = time.time_ns()
+                self.instruction.state = ExecutionState.EXECUTING
+                self.persist_instruction()
 
-            # Notify queue about event
-            event = ProcessingEvent(self.instruction)
-            self.event_queue.put(event)
+                # Notify queue about event
+                event = ProcessingEvent(self.instruction)
+                self.event_queue.put(event)
 
-            # Process instruction
-            self.handle()
+                # Process instruction
+                self.handle()
+            except Exception as e:
+                print(e)
 
     def handle(self):
         """
