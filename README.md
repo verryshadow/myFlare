@@ -90,7 +90,7 @@ On success, the query response contains a code 202, and a Location header linkin
 
 ####Query
 ```bash
-curl -X POST --data @src/query_parser/i2b2/i2b2_gecco_demo.xml -H "Content-type: i2b2/xml" -H "Accept: internal/xml" http://localhost:5000/query
+curl -vX POST --data @src/query_parser/i2b2/i2b2_gecco_demo.xml -H "Content-type: i2b2/xml" -H "Accept: internal/xml" http://localhost:5000/query
 ```
 
 ####Response
