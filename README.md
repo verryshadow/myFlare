@@ -228,7 +228,7 @@ FHIR_BASE_URL=http://localhost:5555/fhir python src/run_server.py
 
 When the server is running, you can run queries:
 ```bash
-curl -X POST --data @query/i2b2/i2b2_demo.xml "Content-type: i2b2/xml" -H "Accept: internal/xml" http://localhost:5000/query
+curl -vX POST --data @src/query_parser/i2b2/i2b2_demo.xml -H "Content-type: i2b2/xml" -H "Accept: internal/xml" http://localhost:5000/query
 ```
 which will return with the relative location to the request status in the location header
 
