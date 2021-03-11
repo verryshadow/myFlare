@@ -1,6 +1,7 @@
 import time
 from argparse import ArgumentParser, Namespace
 from typing import List, Optional
+import sys
 
 from algorithm import AlgorithmStep
 from configuration.io_types import QuerySyntax, ResponseType
@@ -28,6 +29,9 @@ def run(instruction: Instruction) -> str:
 
     algorithm: List[AlgorithmStep] = response_algo_steps_map[instruction.response_type].steps
     parsed_input = parse_input(instruction)
+
+    print(parsed_input, file=sys.stderr)
+
     processed_inclusion_criterions: List[List] = []
     for inclusion_criterion in parsed_input:
         for step in algorithm:
@@ -53,6 +57,7 @@ def parse_input(instruction: Instruction) -> List[List[List[dict]]]:
 
     intermediate_query_repr: List[List[List[dict]]] = \
         syntax_parser_map[instruction.query_syntax](instruction.request_data)
+
     return intermediate_query_repr
 
 

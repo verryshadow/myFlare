@@ -1,0 +1,87 @@
+[
+  {
+    "fhirResourceType": "Observation",
+    "termCode": {
+      "code": "2744-1",
+      "display": "pH of Arterial blood",
+      "system": "http://loinc.org"
+    },
+    "termCodeSearchParameter": "code",
+    "valueSearchParameter": "value-quantity"
+  },
+  {
+    "fhirResourceType": "Observation",
+    "termCode": {
+      "code": "72166-2",
+      "display": "Tabacco smoking status",
+      "system": "http://loinc.org"
+    },
+    "termCodeSearchParameter": "code",
+    "valueSearchParameter": "value-concept",
+    "example": "Observation?code-value-concept=72166-2$LA18976-3"
+  },
+  {
+    "fhirResourceType": "Condition",
+    "termCode": {
+      "code": "G73.3",
+      "display": "Schlafapnoe",
+      "system": "icd10"
+    },
+    "fixedCriteria": [
+      {
+        "value": [
+          "confirmed"
+        ],
+        "searchParameter": "verification-status"
+      }
+    ],
+    "termCodeSearchParameter": "code"
+  },
+  {
+    "fhirResourceType": "Observation",
+    "termCode": {
+      "system": "http://loinc.org",
+      "code": "1988-5",
+      "display": "C reactive protein [Mass/volume] in Serum or Plasma"
+    },
+    "termCodeSearchParameter": "code",
+    "valueSearchParameter": "value-concept",
+    "example": "Observation?code=1988-5&value-quantity=gt18|ucum|a"
+  },
+  {
+    "fhirResourceType": "Procedure",
+    "termCode": {
+      "system": "http://snomed.info/sct",
+      "code": "277132007",
+      "display": "Therapeutic procedure (procedure)"
+    },
+    "fixedCriteria": [
+      {
+        "value": [
+          "completed",
+          "in-progress"
+        ],
+        "searchParameter": "status"
+      }
+    ],
+    "termCodeSearchParameter": "code"
+  },
+  {
+    "fhirResourceType": "MedicationStatement",
+    "termCode": {
+      "system": "http://fhir.de/CodeSystem/dimdi/atc",
+      "code": "J05AE08",
+      "display": "Atazanavir"
+    },
+    "fixedCriteria": [
+      {
+        "value": [
+          "active",
+          "completed"
+        ],
+        "searchParameter": "status"
+      }
+    ],
+    "termCodeSearchParameter": "code"
+  }
+]

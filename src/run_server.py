@@ -2,11 +2,14 @@ import json
 import os
 import os.path
 import time
+import sys
+from run import run as process_request
 from argparse import ArgumentParser
 from queue import Queue, Empty
 from typing import Optional
 from uuid import uuid4, UUID
 from xml.etree import ElementTree as Etree
+
 
 from flask import Flask as Flask, request, Response
 from requests import RequestException
@@ -112,6 +115,34 @@ def create_query():
     response.headers["Location"] = f"/query/{str(instruction.request_id)}"
     return response
 
+@app.route("/query-sync", methods=["POST"])
+def create_query_sync():
+    """
+    Submit a query for execution
+
+    :return: location header containing the url to the result/processing progress
+    """
+
+    query_input: str = request.data.decode("UTF-8")
+
+    # Extract data from Request
+    content_type = request.headers["Content-Type"]
+    query_syntax = content_type_to_query_syntax(content_type)
+    accept = request.headers["Accept"]
+    response_type = accept_to_response_type(accept)
+    query_input: str = request.data.decode("UTF-8")
+
+    # Create Instruction
+    queue_insertion_time: int = time.time_ns()
+    uuid: UUID = uuid4()
+    instruction: Instruction = Instruction(query_input, str(uuid), queue_insertion_time,
+                                           query_syntax=query_syntax, response_type=response_type)
+
+
+    response: str = process_request(instruction)
+    test = "  "
+    # Respond with location header
+    return response
 
 def get_query_from_persistence(query_id: str) -> Optional[Instruction]:
     """
@@ -287,7 +318,7 @@ if __name__ == '__main__':
         refill_queue()
 
     # Start application
-    worker_thread.start()
-    event_distributor_thread.start()
+#    worker_thread.start()
+#    event_distributor_thread.start()
     app.run(host=args.host, port=args.port, threaded=True, debug=True)
 
