@@ -59,7 +59,7 @@ def parse_codex_query_string(codex_json: str) -> List[List[List[dict]]]:
         for src_criterion in src_disjunction:
             disjunction.append(parse_criterion(src_criterion))
         exclusion_criteria.append(disjunction)
-    query += exclusion_criteria
+    query.append(exclusion_criteria)
 
     
 
@@ -99,10 +99,14 @@ def parse_value_filter(value_filter: dict, valueSearchParameter: str):
 
         first_concept = value_filter['selectedConcepts'][0]
 
-        value_concepts=first_concept['system'] + "|" + first_concept['code']
+        #value_concepts = first_concept['system'] + "|" + first_concept['code']
+        value_concepts = first_concept['code']
 
         for concept in value_filter['selectedConcepts'][1:]:
-            value_concepts += "," + concept['system'] + "|" + concept['code']
+            
+            ## TODO put concept system back in
+            #value_concepts += "," + concept['system'] + "|" + concept['code'] 
+            value_concepts += "," + concept['code']
 
         fhir_filter_string += value_concepts
 
@@ -136,6 +140,8 @@ def parse_criterion(json_criterion) -> List[dict]:
 
     if "fixedCriteria" in mapping:
         fhir_search_criterion += parse_fixed_criteria(mapping['fixedCriteria'])
+
+    fhir_search_criterion += "&_format=xml"
 
     print(fhir_search_criterion)
 

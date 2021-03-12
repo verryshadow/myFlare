@@ -23,6 +23,23 @@
   {
     "fhirResourceType": "Condition",
     "termCode": {
+      "code": "J45.9",
+      "display": "Asthma",
+      "system": "http://fhir.de/CodeSystem/dimdi/icd-10-gm"
+    },
+    "fixedCriteria": [
+      {
+        "value": [
+          "refuted"
+        ],
+        "searchParameter": "verification-status"
+      }
+    ],
+    "termCodeSearchParameter": "code"
+  },
+  {
+    "fhirResourceType": "Condition",
+    "termCode": {
       "code": "G73.3",
       "display": "Schlafapnoe",
       "system": "icd10"

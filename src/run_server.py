@@ -3,7 +3,7 @@ import os
 import os.path
 import time
 import sys
-from run import run as process_request
+from run import run_codex_query as run_codex_query
 from argparse import ArgumentParser
 from queue import Queue, Empty
 from typing import Optional
@@ -139,7 +139,7 @@ def create_query_sync():
                                            query_syntax=query_syntax, response_type=response_type)
 
 
-    response: str = process_request(instruction)
+    response: str = run_codex_query(instruction)
     test = "  "
     # Respond with location header
     return response

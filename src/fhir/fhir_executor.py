@@ -25,6 +25,8 @@ def execute_fhir_query(query: str) -> List[Etree.Element]:
     ret = []
     next_query = f'{server_base_url}/{query}'
 
+    
+
     # Execute queries as long as there is a next page
     while next_query is not None:
         next_query, x_response = _execute_single_query(next_query)
