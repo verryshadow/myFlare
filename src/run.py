@@ -29,19 +29,26 @@ def run(instruction: Instruction) -> str:
     algorithm: List[AlgorithmStep] = response_algo_steps_map[instruction.response_type].steps
     parsed_input = parse_input(instruction)
     processed_inclusion_criterions: List[List] = []
+
+    # Process all parsed inclusions
     for inclusion_criterion in parsed_input:
         for step in algorithm:
             inclusion_criterion = step.process(instruction, inclusion_criterion, logger)
         processed_inclusion_criterions.append(inclusion_criterion)
 
+    # subtract all inclusion results from the first inclusion if response type is numeric and multiple inclusions exist
     if instruction.response_type is not ResponseType.INTERNAL and len(processed_inclusion_criterions) > 1:
+        # Initial inclusion result
         result_set = set(processed_inclusion_criterions[0])
+        # Merge inclusion results generated from Exclusions
         excluded_set = set.intersection(*[set(processed_inclusion_criterion) for processed_inclusion_criterion in
                                           processed_inclusion_criterions[1:]])
         result_set -= set(excluded_set)
         result_set = list(result_set)
     else:
         result_set = processed_inclusion_criterions[0]
+
+    # Build result from generated set
     response = response_algo_steps_map[instruction.response_type].response_step.process(instruction, result_set, logger)
     logger.result(response)
     return response
@@ -61,7 +68,6 @@ if __name__ == "__main__":
     parser = ArgumentParser(description="FLARE, run feasibility queries via standard HL7 FHIR search requests")
     parser.add_argument("query_file", type=str, help="path to the file containing the query")
 
-    # TODO Implement the mapping option
     parser.add_argument("--mapping", type=str, help="path to the file containing the i2b2 to FHIR mappings")
     parser.add_argument("--querySyntax", type=str, choices=[e.name for e in QuerySyntax],
                         help="detail which syntax the query is in, default is I2B2", default="I2B2",
