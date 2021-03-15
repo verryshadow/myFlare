@@ -28,7 +28,7 @@
 			},
 			"exclusionCriteria": {
 				"type": "array",
-				"minItems": 1,
+				"minItems": 0,
 				"description": "All elements within the array are conjuncted with an OR operator",
 				"items": {
 					"type": "array",

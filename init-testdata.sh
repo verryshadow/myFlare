@@ -1,4 +1,7 @@
 #!/bin/bash
+
+docker-compose -f docker-compose-odm.yml up
+
 FILES=./testdata/*
 for fhirBundle in $FILES
 do
