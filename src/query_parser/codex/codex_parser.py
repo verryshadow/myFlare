@@ -7,6 +7,24 @@ import json
 with open("query_parser/codex/schema.json", "r") as schema_file:
     schema = json.load(schema_file)
 
+codex_mapping = {}
+
+def get_hash_from_term_code(term_code):
+    hash_val = {
+      'code': term_code['code'],
+      'system': term_code['system'],
+    }
+
+    return hash(frozenset(hash_val.items()))
+
+
+def load_codex_mapping():
+    with open("query_parser/codex/codex-mapping.json", "r") as mapping_file:
+        codex_mapping_input = json.load(mapping_file)
+        
+        for mapping in codex_mapping_input:
+          codex_mapping[get_hash_from_term_code(mapping['termCode'])] = mapping
+
 
 def validate_codex_json(codex: str) -> None:
     """
@@ -30,7 +48,7 @@ def parse_codex_query_string(codex_json: str) -> List[List[List[dict]]]:
     for src_disjunction in src_inclusion_criteria:
         disjunction = []
         for src_criterion in src_disjunction:
-            disjunction += parse_criterion(src_criterion)
+            disjunction.append(parse_criterion(src_criterion))
         inclusion_criteria.append(disjunction)
     query.append(inclusion_criteria)
 
@@ -41,35 +59,62 @@ def parse_codex_query_string(codex_json: str) -> List[List[List[dict]]]:
         for src_criterion in src_disjunction:
             disjunction.append(parse_criterion(src_criterion))
         exclusion_criteria.append(disjunction)
-    query += exclusion_criteria
+    query.append(exclusion_criteria)
+
+    
 
     return query
 
+def parse_fixed_criteria(fixed_criteria: dict):
+    fhir_fixed_string = ""
 
-def parse_value_filter(value_filter: dict, criterion: dict):
+    for criterion in fixed_criteria:
+        
+        first_value = criterion['value'][0]
+        criterion_values = str(first_value)
+
+        for value in criterion['value'][1:]:
+            criterion_values += "," + value
+
+        fhir_fixed_string += "&" + criterion['searchParameter'] + "=" + criterion_values
+
+
+    return fhir_fixed_string 
+
+def parse_value_filter(value_filter: dict, valueSearchParameter: str):
     filter_type = value_filter["type"]
-    clone_criterion = lambda: json.loads(json.dumps(criterion))
-    criteria = []
+
+    fhir_filter_string = ""
 
     # TODO: Implement Unit parsing
     if filter_type == "quantity-comparator":
-        constraint = {"value_operator": value_filter["comparator"], "value_constraint": value_filter["value"]}
-        criterion["constrain"] = constraint
-        criteria.append(criterion)
+        fhir_filter_string += "&" + valueSearchParameter + "=" + value_filter['comparator'] + str(value_filter['value'])
+        return fhir_filter_string
     elif filter_type == "quantity-range":
-        min_crit = clone_criterion()
-        max_crit = clone_criterion()
-        max_crit["constrain"] = {"value_operator": "le", "value_constraint": value_filter["maxValue"]}
-        min_crit["constrain"] = {"value_operator": "ge", "value_constraint": value_filter["minValue"]}
-        criteria.append(max_crit)
-        criteria.append(min_crit)
+        fhir_filter_string += "&" + valueSearchParameter + "=ge" + value_filter['minValue']
+        fhir_filter_string += "&" + valueSearchParameter + "=le" + value_filter['maxValue']
+        return fhir_filter_string
     elif filter_type == "concept":
-        # TODO Implement
-        pass
+        fhir_filter_string = "&" + valueSearchParameter + "="
+
+        first_concept = value_filter['selectedConcepts'][0]
+
+        #value_concepts = first_concept['system'] + "|" + first_concept['code']
+        value_concepts = first_concept['code']
+
+        for concept in value_filter['selectedConcepts'][1:]:
+            
+            ## TODO put concept system back in
+            #value_concepts += "," + concept['system'] + "|" + concept['code'] 
+            value_concepts += "," + concept['code']
+
+        fhir_filter_string += value_concepts
+
+        return fhir_filter_string
     else:
         raise ValueFilterNotFound(f"{filter_type} is not a recognized filter function")
 
-    return criteria
+    return ""
 
 
 class ValueFilterNotFound(Exception):
@@ -78,30 +123,35 @@ class ValueFilterNotFound(Exception):
 
 
 def parse_criterion(json_criterion) -> List[dict]:
-    term_code: dict = json_criterion["termCode"]
-    value_filter: Optional[dict] = json_criterion["valueFilter"] if "valueFilter" in json_criterion else None
 
-    resource: str = lookup_resource(term_code["code"])
-    code = term_code["code"]
-    code_system = term_code["system"]
+    fhir_search_criterion = ""
 
-    criterion = {"res": resource, "param": "code", "sys": code_system, "code": code}
+    if not get_hash_from_term_code(json_criterion["termCode"]) in codex_mapping:
+        print("this should not happen - throw error as query cannot be translated")
+        return fhir_search_criterion
 
-    if value_filter is not None:
-        criteria: List[dict] = parse_value_filter(value_filter, criterion)
-    else:
-        criteria = [criterion]
+    mapping = codex_mapping[get_hash_from_term_code(json_criterion["termCode"])]
 
-    return criteria
+    fhir_search_criterion += mapping['fhirResourceType'] + "?"
+    fhir_search_criterion += mapping['termCodeSearchParameter'] + "=" + json_criterion["termCode"]['code']
+
+    if "valueFilter" in json_criterion:
+        fhir_search_criterion += parse_value_filter(json_criterion['valueFilter'], mapping['valueSearchParameter'])
+
+    if "fixedCriteria" in mapping:
+        fhir_search_criterion += parse_fixed_criteria(mapping['fixedCriteria'])
+
+    fhir_search_criterion += "&_format=xml"
+
+    print(fhir_search_criterion)
+
+    return fhir_search_criterion
 
 
-def lookup_resource(item_key: str) -> str:
-    # TODO: Implement real lookup
-    return "Observation"
-
+load_codex_mapping()
 
 if __name__ == "__main__":
-    with open("example.json", "r") as codex_json_file:
+    with open("query_parser/codex/example2.json", "r") as codex_json_file:
         cdx = parse_codex_query_string(codex_json_file.read())
-        # print(cdx)
+        print(cdx)
 

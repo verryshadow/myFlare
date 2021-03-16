@@ -9,6 +9,9 @@ from configuration.process_configuration import response_algo_steps_map
 from worker.communication import Instruction
 from worker.communication.instruction import ExecutionState
 from worker.communication.logging_callback import default_logger
+from fhir import execute_fhir_query
+from fhir import get_patient_ids_from_bundle
+
 
 __debug = True
 
@@ -62,6 +65,62 @@ def parse_input(instruction: Instruction) -> List[List[List[dict]]]:
         syntax_parser_map[instruction.query_syntax](instruction.request_data)
     return intermediate_query_repr
 
+
+def run_codex_query(instruction: Instruction) -> str:
+    """
+    Main function, runs the entire Script and returns a set of IDs
+
+    :param instruction: The query which is to be executed against a FHIR Server
+    :return: The finished response string that can be transferred through http
+    """
+    logger = default_logger
+
+
+    parsed_input = parse_input(instruction)
+
+    # inclusion criteria
+    fhir_cnf_responses = set()
+
+    for fhir_disjunction in parsed_input[0]:
+      fhir_disjunction_res = set()
+      for query in fhir_disjunction:
+          if query == "":
+            continue
+          paged_query_result = execute_fhir_query(query)
+          for fhir_response in paged_query_result:
+              pat_ids = get_patient_ids_from_bundle(fhir_response)
+              fhir_disjunction_res = fhir_disjunction_res.union(pat_ids)
+
+      if len(fhir_cnf_responses) == 0:
+          fhir_cnf_responses = fhir_disjunction_res
+      else:
+          fhir_cnf_responses = fhir_cnf_responses.intersection(fhir_disjunction_res)
+
+    # exclusion criteria
+    fhir_dnf_responses = set()
+    for fhir_conjunction in parsed_input[1]:
+      fhir_conjunction_res = set()
+      for query in fhir_conjunction:
+          if query == "":
+            continue
+
+          paged_query_result = execute_fhir_query(query)
+
+          pat_ids = set()
+          for fhir_response in paged_query_result:
+              pat_ids = pat_ids.union(get_patient_ids_from_bundle(fhir_response))
+          
+          if len(fhir_conjunction_res) == 0:
+              fhir_conjunction_res = pat_ids
+          else:
+              fhir_conjunction_res = fhir_conjunction_res.intersection(pat_ids)
+    
+      fhir_dnf_responses.union(fhir_conjunction_res)
+    
+    #subtract both sets from one another
+    final_response = fhir_cnf_responses - fhir_dnf_responses 
+    
+    return str(len(final_response))
 
 if __name__ == "__main__":
     # Parse arguments

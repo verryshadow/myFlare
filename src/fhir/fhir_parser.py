@@ -72,6 +72,24 @@ def _extract_id_from_observation(observation: Etree.Element) -> str:
 
     return patient_id
 
+def _extract_id_from_condition(condition: Etree.Element) -> str:
+    # get reference https://www.hl7.org/fhir/references.html#Reference
+    x_reference_element = condition.find(".ns0:subject", ns)
+
+    # Extract all tags possibly containing values
+    x_identifier = x_reference_element.find("./ns0:identifier", ns)
+    x_reference = x_reference_element.find("./ns0:reference", ns)
+    x_type = x_reference_element.find("./ns0:type", ns)
+
+    patient_id = None
+    if x_identifier is not None:
+        x_value = x_identifier.find("./ns0:value", ns)
+        patient_id = x_value.attrib["value"]
+    # TODO: Proper reference handling by executing FHIR query
+    elif x_reference is not None:
+        patient_id = x_reference.attrib["value"].split("/")[-1]
+
+    return patient_id
 
 def _extract_id_from_encounter(encounter: Etree.Element) -> str:
     # TODO implement
@@ -102,6 +120,7 @@ _resource_to_extractor_mapping = {
     "patient": _extract_id_from_patient,
     "observation": _extract_id_from_observation,
     "encounter": _extract_id_from_encounter,
+    "condition": _extract_id_from_condition
 }
 
 

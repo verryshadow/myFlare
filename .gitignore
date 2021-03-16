@@ -6,3 +6,4 @@ src/worker/requests/
 virtenv/Include/
 virtenv/**
 FHIR/fhir_responses/
+testdata

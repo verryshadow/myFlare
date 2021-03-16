@@ -1,0 +1,102 @@
+[
+  {
+    "fhirResourceType": "Observation",
+    "termCode": {
+      "code": "2744-1",
+      "display": "pH of Arterial blood",
+      "system": "http://loinc.org"
+    },
+    "termCodeSearchParameter": "code",
+    "valueSearchParameter": "value-quantity"
+  },
+  {
+    "fhirResourceType": "Observation",
+    "termCode": {
+      "code": "72166-2",
+      "display": "Tabacco smoking status",
+      "system": "http://loinc.org"
+    },
+    "termCodeSearchParameter": "code",
+    "valueSearchParameter": "value-concept"
+  },
+  {
+    "fhirResourceType": "Condition",
+    "termCode": {
+      "code": "J45.9",
+      "display": "Asthma",
+      "system": "http://fhir.de/CodeSystem/dimdi/icd-10-gm"
+    },
+    "fixedCriteria": [
+      {
+        "value": [
+          "refuted"
+        ],
+        "searchParameter": "verification-status"
+      }
+    ],
+    "termCodeSearchParameter": "code"
+  },
+  {
+    "fhirResourceType": "Condition",
+    "termCode": {
+      "code": "G73.3",
+      "display": "Schlafapnoe",
+      "system": "icd10"
+    },
+    "fixedCriteria": [
+      {
+        "value": [
+          "confirmed"
+        ],
+        "searchParameter": "verification-status"
+      }
+    ],
+    "termCodeSearchParameter": "code"
+  },
+  {
+    "fhirResourceType": "Observation",
+    "termCode": {
+      "system": "http://loinc.org",
+      "code": "1988-5",
+      "display": "C reactive protein [Mass/volume] in Serum or Plasma"
+    },
+    "termCodeSearchParameter": "code",
+    "valueSearchParameter": "value-concept"
+  },
+  {
+    "fhirResourceType": "Procedure",
+    "termCode": {
+      "system": "http://demons.info/tcs",
+      "code": "12345",
+      "display": "Therapy"
+    },
+    "fixedCriteria": [
+      {
+        "value": [
+          "completed",
+          "in-progress"
+        ],
+        "searchParameter": "status"
+      }
+    ],
+    "termCodeSearchParameter": "code"
+  },
+  {
+    "fhirResourceType": "MedicationStatement",
+    "termCode": {
+      "system": "http://fhir.de/CodeSystem/dimdi/atc",
+      "code": "J05AE08",
+      "display": "Atazanavir"
+    },
+    "fixedCriteria": [
+      {
+        "value": [
+          "active",
+          "completed"
+        ],
+        "searchParameter": "status"
+      }
+    ],
+    "termCodeSearchParameter": "code"
+  }
+]
