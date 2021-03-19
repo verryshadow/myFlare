@@ -65,6 +65,12 @@ def parse_input(instruction: Instruction) -> List[List[List[dict]]]:
         syntax_parser_map[instruction.query_syntax](instruction.request_data)
     return intermediate_query_repr
 
+def run_translate_query():
+    #todo
+    logger = default_logger
+
+    parsed_input = str(parse_input(instruction))
+    return parse_input
 
 def run_codex_query(instruction: Instruction) -> str:
     """
