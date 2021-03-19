@@ -7,7 +7,18 @@ import json
 with open("query_parser/codex/schema.json", "r") as schema_file:
     schema = json.load(schema_file)
 
+with open("query_parser/codex/codex-code-tree.json", "r") as ontology_file:
+    ontology = json.load(ontology_file)
+
 codex_mapping = {}
+
+def load_codex_mapping():
+    with open("query_parser/codex/codex-mapping.json", "r") as mapping_file:
+        codex_mapping_input = json.load(mapping_file)
+        
+        for mapping in codex_mapping_input['entries']:
+          codex_mapping[get_hash_from_term_code(mapping['key'])] = mapping
+
 
 def get_hash_from_term_code(term_code):
     hash_val = {
@@ -18,12 +29,52 @@ def get_hash_from_term_code(term_code):
     return hash(frozenset(hash_val.items()))
 
 
-def load_codex_mapping():
-    with open("query_parser/codex/codex-mapping.json", "r") as mapping_file:
-        codex_mapping_input = json.load(mapping_file)
+def flatten_tree(tree: dict, code_string: str):
+  
+  if 'children' in tree:
+    for child in tree['children']:
+      if 'termCode' in child and child['termCode']['code'] is not None:
+
+        if len(code_string) > 0:
+          code_string = code_string + ","
         
-        for mapping in codex_mapping_input:
-          codex_mapping[get_hash_from_term_code(mapping['termCode'])] = mapping
+        code_string = code_string + child['termCode']['code']
+        
+      code_string = flatten_tree(child, code_string)
+
+  return code_string
+
+
+def get_subtree_for_code(tree: dict, search_string: str):
+
+  found_tree = None
+
+  if 'children' in tree:
+
+    for child in tree['children']:
+      if 'termCode' in child:
+        if search_string == child['termCode']['code']:
+          return child
+
+      if found_tree is None:
+        found_tree = get_subtree_for_code(child, search_string)
+
+  return found_tree
+
+
+def get_codes_for_code(code):
+
+  sub_tree = get_subtree_for_code(ontology, code)
+
+  if sub_tree is None:
+    return code
+
+  flattened_subtree = flatten_tree(sub_tree , "")
+
+  if flattened_subtree == '':
+    return code
+
+  return code + "," + flattened_subtree
 
 
 def validate_codex_json(codex: str) -> None:
@@ -61,20 +112,19 @@ def parse_codex_query_string(codex_json: str) -> List[List[List[dict]]]:
         exclusion_criteria.append(disjunction)
     query.append(exclusion_criteria)
 
-    
-
     return query
+
 
 def parse_fixed_criteria(fixed_criteria: dict):
     fhir_fixed_string = ""
 
     for criterion in fixed_criteria:
         
-        first_value = criterion['value'][0]
+        first_value = criterion['value'][0]['code']
         criterion_values = str(first_value)
 
         for value in criterion['value'][1:]:
-            criterion_values += "," + value
+            criterion_values += "," + value['code']
 
         fhir_fixed_string += "&" + criterion['searchParameter'] + "=" + criterion_values
 
@@ -91,8 +141,8 @@ def parse_value_filter(value_filter: dict, valueSearchParameter: str):
         fhir_filter_string += "&" + valueSearchParameter + "=" + value_filter['comparator'] + str(value_filter['value'])
         return fhir_filter_string
     elif filter_type == "quantity-range":
-        fhir_filter_string += "&" + valueSearchParameter + "=ge" + value_filter['minValue']
-        fhir_filter_string += "&" + valueSearchParameter + "=le" + value_filter['maxValue']
+        fhir_filter_string += "&" + valueSearchParameter + "=ge" + str(value_filter['minValue'])
+        fhir_filter_string += "&" + valueSearchParameter + "=le" + str(value_filter['maxValue'])
         return fhir_filter_string
     elif filter_type == "concept":
         fhir_filter_string = "&" + valueSearchParameter + "="
@@ -127,23 +177,21 @@ def parse_criterion(json_criterion) -> List[dict]:
     fhir_search_criterion = ""
 
     if not get_hash_from_term_code(json_criterion["termCode"]) in codex_mapping:
-        print("this should not happen - throw error as query cannot be translated")
+        print("mapping missing for termCode: " , json_criterion["termCode"])
         return fhir_search_criterion
 
     mapping = codex_mapping[get_hash_from_term_code(json_criterion["termCode"])]
 
     fhir_search_criterion += mapping['fhirResourceType'] + "?"
-    fhir_search_criterion += mapping['termCodeSearchParameter'] + "=" + json_criterion["termCode"]['code']
-
+    
     if "valueFilter" in json_criterion:
+        fhir_search_criterion += mapping['termCodeSearchParameter'] + "=" + json_criterion["termCode"]['code']
         fhir_search_criterion += parse_value_filter(json_criterion['valueFilter'], mapping['valueSearchParameter'])
+    else:
+      fhir_search_criterion += mapping['termCodeSearchParameter'] + "=" + get_codes_for_code(json_criterion["termCode"]['code'])
 
     if "fixedCriteria" in mapping:
         fhir_search_criterion += parse_fixed_criteria(mapping['fixedCriteria'])
-
-    fhir_search_criterion += "&_format=xml"
-
-    print(fhir_search_criterion)
 
     return fhir_search_criterion
 

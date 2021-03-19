@@ -11,20 +11,20 @@
       [
         {
           "termCode": {
-            "code": "G73.3",
-            "system": "icd10",
+            "code": "J98.4",
+            "system": "http://fhir.de/CodeSystem/dimdi/icd-10-gm",
             "version": "v1",
-            "display": "Schlafapnoe"
+            "display": "Sonstige Ver\u00e4nderungen der Lunge"
           }
         }
       ],
       [
         {
           "termCode": {
-            "code": "1988-5",
+            "code": "59828-4",
             "system": "http://loinc.org",
             "version": "v1",
-            "display": "C reactive protein [Mass/volume] in Serum or Plasma"
+            "display": "Bilirubin.total [Mass/volume] in Venous blood"
           },
           "valueFilter": {
             "selectedConcepts": [
@@ -68,16 +68,16 @@
         },
         {
           "termCode": {
-            "code": "2744-1",
+            "code": "76769-9",
             "system": "http://loinc.org",
-            "display": "pH of Arterial blood"
+            "display": "Hemoglobin [Mass/volume] in Venous blood by Oximetry"
           },
           "valueFilter": {
             "valueDefinition": null,
             "type": "quantity-comparator",
             "unit": {
-              "code": "pH",
-              "display": "pH"
+              "code": "g/dl",
+              "display": "g/dl"
             },
             "comparator": "gt",
             "value": 7.4

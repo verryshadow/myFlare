@@ -11,6 +11,8 @@ services:
     restart: always
     volumes:
       - ./src:/opt/flare/src
+      - ./ontology/codex-code-tree.json:/opt/flare/src/query_parser/codex/codex-code-tree.json
+      - ./ontology/codex-mapping.json:/opt/flare/src/query_parser/codex/codex-mapping.json
 
   fhir-server:
     image: ghcr.io/chgl/hapi/hapi-fhir-jpaserver-starter:5.2.0-distroless

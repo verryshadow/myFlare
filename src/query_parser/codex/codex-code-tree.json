@@ -1,0 +1,42 @@
+{
+    "children": [
+        {
+            "children": [
+                {
+                    "children": [
+                        {
+                            "children": [],
+                            "termCode": {
+                                "code": "A16.2",
+                                "display": "Lungentuberkulose ohne Angabe einer bakteriologischen, molekularbiologischen oder histologischen Sicherung",
+                                "system": "http://fhir.de/CodeSystem/dimdi/icd-10-gm"
+                            }
+                        }
+                    ],
+                    "termCode": {
+                        "code": "J98.4",
+                        "display": "Sonstige Ver\u00e4nderungen der Lunge",
+                        "system": "urn:oid:1.2.276.0.76.5.409"
+                    }
+                }
+            ]
+        },
+        {
+            "children": [
+                {
+                    "children": [],
+                    "termCode": {
+                        "code": "123",
+                        "display": "Exposure to covid",
+                        "system": "http://my-vocab-address"
+                    }
+                }
+            ]
+        }
+    ],
+    "termCode": {
+        "code": "",
+        "display": "",
+        "system": ""
+    }
+}

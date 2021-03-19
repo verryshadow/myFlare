@@ -23,7 +23,8 @@ def execute_fhir_query(query: str) -> List[Etree.Element]:
     :return: List of FHIR-bundles in xml format returned by the FHIR server
     """
     ret = []
-    next_query = f'{server_base_url}/{query}'
+
+    next_query = f'{server_base_url}/{query}&_format=xml'
 
     # Execute queries as long as there is a next page
     while next_query is not None:
