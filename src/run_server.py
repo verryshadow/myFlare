@@ -2,7 +2,7 @@ import json
 import os
 import os.path
 import time
-from run import run_codex_query
+from run import run_codex_query, run_translate_query
 from argparse import ArgumentParser
 from queue import Queue, Empty
 from typing import Optional
@@ -113,6 +113,7 @@ def create_query():
     response.headers["Location"] = f"/query/{str(instruction.request_id)}"
     return response
 
+@app.route("/query-translate", methods=["POST"])
 def create_query_translate():
     """
     Submit a query for execution
@@ -136,7 +137,6 @@ def create_query_translate():
                                            query_syntax=query_syntax, response_type=response_type)
 
     response: str = run_translate_query(instruction)
-    test = "  "
     # Respond with location header
     return response
 
