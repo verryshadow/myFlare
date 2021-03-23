@@ -91,9 +91,8 @@ def validate_codex_json(codex: str) -> None:
 def parse_codex_query_string(codex_json: str) -> List[List[List[dict]]]:
     validate_codex_json(codex_json)
     codex = json.loads(codex_json)
-    src_query = codex["query"]
 
-    src_inclusion_criteria = src_query["inclusionCriteria"]
+    src_inclusion_criteria = codex["inclusionCriteria"]
     query = []
     inclusion_criteria = []
     for src_disjunction in src_inclusion_criteria:
@@ -103,7 +102,11 @@ def parse_codex_query_string(codex_json: str) -> List[List[List[dict]]]:
         inclusion_criteria.append(disjunction)
     query.append(inclusion_criteria)
 
-    src_exclusion_criteria = src_query["exclusionCriteria"]
+    if "exclusionCriteria" in codex:
+        src_exclusion_criteria = codex["exclusionCriteria"]
+    else:
+        src_exclusion_criteria = []
+    
     exclusion_criteria = []
     for src_disjunction in src_exclusion_criteria:
         disjunction = []

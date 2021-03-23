@@ -160,7 +160,7 @@ def get_query_from_persistence(query_id: str) -> Optional[Instruction]:
 
 @app.route("/query/<query_id>/status", methods=["GET"])
 def handle_query_state(query_id: str):
-    """
+    """ 
     Fetches the current processing state of a given query
 
     :param query_id: id of the query to be looked up
