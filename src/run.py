@@ -1,4 +1,5 @@
 import time
+import json
 from argparse import ArgumentParser, Namespace
 from typing import List, Optional
 
@@ -65,6 +66,14 @@ def parse_input(instruction: Instruction) -> List[List[List[dict]]]:
         syntax_parser_map[instruction.query_syntax](instruction.request_data)
     return intermediate_query_repr
 
+def run_translate_query(instruction: Instruction) -> str:
+    #todo
+    #make json dump
+    logger = default_logger
+    
+    parsed_input = parse_input(instruction)
+    
+    return json.dumps(parsed_input)
 
 def run_codex_query(instruction: Instruction) -> str:
     """

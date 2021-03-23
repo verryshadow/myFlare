@@ -2,7 +2,7 @@ import json
 import os
 import os.path
 import time
-from run import run_codex_query
+from run import run_codex_query, run_translate_query
 from argparse import ArgumentParser
 from queue import Queue, Empty
 from typing import Optional
@@ -113,6 +113,32 @@ def create_query():
     response.headers["Location"] = f"/query/{str(instruction.request_id)}"
     return response
 
+@app.route("/query-translate", methods=["POST"])
+def create_query_translate():
+    """
+    Submit a query for execution
+
+    :return: location header containing the url to the result/processing progress
+    """
+
+    query_input: str = request.data.decode("UTF-8")
+
+    # Extract data from Request
+    content_type = request.headers["Content-Type"]
+    query_syntax = content_type_to_query_syntax(content_type)
+    accept = request.headers["Accept"]
+    response_type = accept_to_response_type(accept)
+    query_input: str = request.data.decode("UTF-8")
+
+    # Create Instruction
+    queue_insertion_time: int = time.time_ns()
+    uuid: UUID = uuid4()
+    instruction: Instruction = Instruction(query_input, str(uuid), queue_insertion_time,
+                                           query_syntax=query_syntax, response_type=response_type)
+
+    response: str = run_translate_query(instruction)
+    # Respond with location header
+    return response
 
 @app.route("/query-sync", methods=["POST"])
 def create_query_sync():
