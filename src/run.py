@@ -37,7 +37,8 @@ def run(instruction: Instruction) -> str:
     # Process all parsed inclusions
     for inclusion_criterion in parsed_input:
         for step in algorithm:
-            inclusion_criterion = step.process(instruction, inclusion_criterion, logger)
+            inclusion_criterion = step.process(
+                instruction, inclusion_criterion, logger)
         processed_inclusion_criterions.append(inclusion_criterion)
 
     # subtract all inclusion results from the first inclusion if response type is numeric and multiple inclusions exist
@@ -53,26 +54,25 @@ def run(instruction: Instruction) -> str:
         result_set = processed_inclusion_criterions[0]
 
     # Build result from generated set
-    response = response_algo_steps_map[instruction.response_type].response_step.process(instruction, result_set, logger)
+    response = response_algo_steps_map[instruction.response_type].response_step.process(
+        instruction, result_set, logger)
     logger.result(response)
     return response
 
 
 def parse_input(instruction: Instruction) -> List[List[List[dict]]]:
     instruction.state = ExecutionState.PARSING
-    default_logger.log_progress_event(instruction, information=instruction.query_syntax.name)
+    default_logger.log_progress_event(
+        instruction, information=instruction.query_syntax.name)
 
     intermediate_query_repr: List[List[List[dict]]] = \
         syntax_parser_map[instruction.query_syntax](instruction.request_data)
     return intermediate_query_repr
 
 def run_translate_query(instruction: Instruction) -> str:
-    #todo
-    #make json dump
-    logger = default_logger
-    
+    logger = default_logger 
     parsed_input = parse_input(instruction)
-    
+
     return json.dumps(parsed_input)
 
 def run_codex_query(instruction: Instruction) -> str:
@@ -84,59 +84,65 @@ def run_codex_query(instruction: Instruction) -> str:
     """
     logger = default_logger
 
-
     parsed_input = parse_input(instruction)
 
     # inclusion criteria
     fhir_cnf_responses = set()
 
     for fhir_disjunction in parsed_input[0]:
-      fhir_disjunction_res = set()
-      for query in fhir_disjunction:
-          if query == "":
-            continue
-          paged_query_result = execute_fhir_query(query)
-          for fhir_response in paged_query_result:
-              pat_ids = get_patient_ids_from_bundle(fhir_response)
-              fhir_disjunction_res = fhir_disjunction_res.union(pat_ids)
+        fhir_disjunction_res = set()
+        for query in fhir_disjunction:
+            if query == "":
+                continue
+            paged_query_result = execute_fhir_query(query)
+            for fhir_response in paged_query_result:
+                pat_ids = get_patient_ids_from_bundle(fhir_response)
+                fhir_disjunction_res = fhir_disjunction_res.union(pat_ids)
 
-      if len(fhir_cnf_responses) == 0:
-          fhir_cnf_responses = fhir_disjunction_res
-      else:
-          fhir_cnf_responses = fhir_cnf_responses.intersection(fhir_disjunction_res)
+        if len(fhir_cnf_responses) == 0:
+            fhir_cnf_responses = fhir_disjunction_res
+        else:
+            fhir_cnf_responses = fhir_cnf_responses.intersection(
+                fhir_disjunction_res)
 
     # exclusion criteria
     fhir_dnf_responses = set()
     for fhir_conjunction in parsed_input[1]:
-      fhir_conjunction_res = set()
-      for query in fhir_conjunction:
-          if query == "":
-            continue
+        fhir_conjunction_res = set()
+        for query in fhir_conjunction:
+            if query == "":
+                continue
 
-          paged_query_result = execute_fhir_query(query)
+            paged_query_result = execute_fhir_query(query)
 
-          pat_ids = set()
-          for fhir_response in paged_query_result:
-              pat_ids = pat_ids.union(get_patient_ids_from_bundle(fhir_response))
-          
-          if len(fhir_conjunction_res) == 0:
-              fhir_conjunction_res = pat_ids
-          else:
-              fhir_conjunction_res = fhir_conjunction_res.intersection(pat_ids)
-    
-      fhir_dnf_responses.union(fhir_conjunction_res)
-    
-    #subtract both sets from one another
-    final_response = fhir_cnf_responses - fhir_dnf_responses 
-    
+            pat_ids = set()
+            for fhir_response in paged_query_result:
+                pat_ids = pat_ids.union(
+                    get_patient_ids_from_bundle(fhir_response))
+
+            if len(fhir_conjunction_res) == 0:
+                fhir_conjunction_res = pat_ids
+            else:
+                fhir_conjunction_res = fhir_conjunction_res.intersection(
+                    pat_ids)
+
+        fhir_dnf_responses = fhir_dnf_responses.union(fhir_conjunction_res)
+
+    # subtract both sets from one another
+    final_response = fhir_cnf_responses - fhir_dnf_responses
+
     return str(len(final_response))
+
 
 if __name__ == "__main__":
     # Parse arguments
-    parser = ArgumentParser(description="FLARE, run feasibility queries via standard HL7 FHIR search requests")
-    parser.add_argument("query_file", type=str, help="path to the file containing the query")
+    parser = ArgumentParser(
+        description="FLARE, run feasibility queries via standard HL7 FHIR search requests")
+    parser.add_argument("query_file", type=str,
+                        help="path to the file containing the query")
 
-    parser.add_argument("--mapping", type=str, help="path to the file containing the i2b2 to FHIR mappings")
+    parser.add_argument("--mapping", type=str,
+                        help="path to the file containing the i2b2 to FHIR mappings")
     parser.add_argument("--querySyntax", type=str, choices=[e.name for e in QuerySyntax],
                         help="detail which syntax the query is in, default is I2B2", default="I2B2",
                         dest="query_syntax")

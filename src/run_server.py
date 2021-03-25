@@ -116,9 +116,9 @@ def create_query():
 @app.route("/query-translate", methods=["POST"])
 def create_query_translate():
     """
-    Submit a query for execution
+    Submit a query for translation  
 
-    :return: location header containing the url to the result/processing progress
+    :return: translated query as string
     """
 
     query_input: str = request.data.decode("UTF-8")
