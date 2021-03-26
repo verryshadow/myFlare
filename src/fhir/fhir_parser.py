@@ -91,7 +91,6 @@ def _extract_id_from_condition(condition: Etree.Element) -> str:
 
     return patient_id
 
-
 def _extract_id_from_encounter(encounter: Etree.Element) -> str:
     # TODO implement
     pass
