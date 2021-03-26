@@ -2,12 +2,7 @@ import json
 import os
 import os.path
 import time
-<<<<<<< HEAD
-import sys
-from run import run_codex_query as run_codex_query
-=======
 from run import run_codex_query, run_translate_query
->>>>>>> add-code-expansion
 from argparse import ArgumentParser
 from queue import Queue, Empty
 from typing import Optional
