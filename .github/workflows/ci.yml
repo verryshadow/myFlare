@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Prepare Test Files
+      run: ln -s $(pwd)/src/query_parser/codex ontology
+
+    - name: Build the stack
+      run: docker-compose up -d
+
+    - name: Test Query Endpoint
+      run: docker run --network container:codex-flare_flare_1 -v $(pwd)/src/query_parser/i2b2:/i2b2 appropriate/curl -vX POST --data @/i2b2/i2b2_gecco_demo.xml -H "Content-type:i2b2/xml" -H "Accept:internal/xml" http://localhost:5000/query
