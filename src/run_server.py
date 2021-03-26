@@ -165,7 +165,6 @@ def create_query_sync():
                                            query_syntax=query_syntax, response_type=response_type)
 
     response: str = run_codex_query(instruction)
-    test = "  "
     # Respond with location header
     return response
 
@@ -333,6 +332,7 @@ if __name__ == '__main__':
     parser.add_argument("--host", "-H", type=str, help="host on which to listen", default="0.0.0.0")
     parser.add_argument("--port", "-P", type=int, help="port on which to listen", default=5000)
     parser.add_argument("--continue", action="store_true", dest="continue_from_persistence")
+    parser.add_argument("--debug", action="store_true")
     args = parser.parse_args()
 
     # Set application wide persistence folder
@@ -345,5 +345,5 @@ if __name__ == '__main__':
     # Start application
 #    worker_thread.start()
 #    event_distributor_thread.start()
-    app.run(host=args.host, port=args.port, threaded=True, debug=True)
 
+    app.run(host=args.host, port=args.port, threaded=True, debug=args.debug)

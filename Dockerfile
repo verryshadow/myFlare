@@ -13,4 +13,4 @@ RUN pip install --user -r requirements.txt
 # copy only the dependencies installation from the 1st stage image
 COPY ./src .
 
-ENTRYPOINT [ "python3", "run_server.py" ]
+ENTRYPOINT [ "/bin/sh", "-c" , "/opt/flare/src/run_flare.sh" ]

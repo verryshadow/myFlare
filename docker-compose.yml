@@ -7,6 +7,7 @@ services:
       - ${PORT_FLARE:-127.0.0.1:5000}:5000
     environment:
       FHIR_BASE_URL: ${FHIR_BASE_URL:-http://fhir-server:8080/fhir}
+      DEBUG: ${FLARE_DEBUG:-}
     build: .
     restart: always
     volumes:
