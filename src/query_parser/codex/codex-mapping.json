@@ -1,5 +1,4 @@
-{
-  "entries": [
+[
     {
       "fhirResourceType": "Condition",
       "fixedCriteria": [
@@ -77,5 +76,5 @@
   "termCodeSearchParameter": "code",
   "valueSearchParameter": "value-quantity"
 }
-  ]
-}
+]
+
