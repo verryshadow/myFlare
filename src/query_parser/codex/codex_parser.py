@@ -124,23 +124,6 @@ def parse_fixed_criteria(fixed_criteria: dict):
 
     for criterion in fixed_criteria:
 
-        first_value = criterion['value'][0]
-        criterion_values = str(first_value)
-
-        for value in criterion['value'][1:]:
-            criterion_values += "," + value
-
-        fhir_fixed_string += "&" + \
-            criterion['searchParameter'] + "=" + criterion_values
-
-    return fhir_fixed_string
-
-
-def parse_fixed_criteria(fixed_criteria: dict):
-    fhir_fixed_string = ""
-
-    for criterion in fixed_criteria:
-
         first_value = criterion['value'][0]['code']
         criterion_values = str(first_value)
 
@@ -173,14 +156,9 @@ def parse_value_filter(value_filter: dict, valueSearchParameter: str):
         fhir_filter_string = "&" + valueSearchParameter + "="
 
         first_concept = value_filter['selectedConcepts'][0]
-
-        #value_concepts = first_concept['system'] + "|" + first_concept['code']
         value_concepts = f'{first_concept["system"]}|{first_concept["code"]}'
 
         for concept in value_filter['selectedConcepts'][1:]:
-
-            # TODO put concept system back in
-            #value_concepts += "," + concept['system'] + "|" + concept['code']
             value_concepts += "," + concept['code']
 
         fhir_filter_string += value_concepts
