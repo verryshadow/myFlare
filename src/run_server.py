@@ -122,14 +122,12 @@ def create_query_translate():
     :return: translated query as string
     """
 
-    query_input: str = request.data.decode("UTF-8")
-
     # Extract data from Request
     content_type = request.headers["Content-Type"]
     query_syntax = content_type_to_query_syntax(content_type)
     accept = request.headers["Accept"]
     response_type = accept_to_response_type(accept)
-    query_input: str = request.data.decode("UTF-8")
+    query_input: str = request.data.decode("iso-8859-1")
 
     # Create Instruction
     queue_insertion_time: int = time.time_ns()
@@ -149,14 +147,12 @@ def create_query_sync():
     :return: location header containing the url to the result/processing progress
     """
 
-    query_input: str = request.data.decode("UTF-8")
-
     # Extract data from Request
     content_type = request.headers["Content-Type"]
     query_syntax = content_type_to_query_syntax(content_type)
     accept = request.headers["Accept"]
     response_type = accept_to_response_type(accept)
-    query_input: str = request.data.decode("UTF-8")
+    query_input: str = request.data.decode("iso-8859-1")
 
     # Create Instruction
     queue_insertion_time: int = time.time_ns()

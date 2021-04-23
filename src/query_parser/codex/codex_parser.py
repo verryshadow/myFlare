@@ -37,9 +37,9 @@ def flatten_tree(tree: dict, code_string: str):
             if 'termCode' in child and child['termCode']['code'] is not None:
 
                 if len(code_string) > 0:
-                    code_string = code_string + ","
+                    code_string = f'{code_string},'
 
-                code_string = code_string + child['termCode']['system'] + "|" + child['termCode']['code']
+                code_string = f'{code_string}{child["termCode"]["system"]}|{child["termCode"]["code"]}'
 
             code_string = flatten_tree(child, code_string)
 
@@ -68,15 +68,14 @@ def get_codes_for_code(code, system):
     sub_tree = get_subtree_for_code(ontology, code)
 
     if sub_tree is None:
-        return system + "|" + code
+        return f'{system}|{code}'
 
     flattened_subtree = flatten_tree(sub_tree, "")
 
     if flattened_subtree == '':
-        return system + "|" + code
+        return f'{system}|{code}'
 
-    return system + "|" + code + "," + flattened_subtree
-
+    return f'{system}|{code},{flattened_subtree}'
 
 def validate_codex_json(codex: str) -> None:
     """
@@ -128,38 +127,39 @@ def parse_fixed_criteria(fixed_criteria: dict):
         criterion_values = str(first_value)
 
         for value in criterion['value'][1:]:
-            criterion_values += "," + value['code']
+            criterion_values += f',{value["code"]}'
 
-        fhir_fixed_string += "&" + \
-            criterion['searchParameter'] + "=" + criterion_values
+        fhir_fixed_string += f'&{criterion["searchParameter"]}={criterion_values}'
 
     return fhir_fixed_string
 
 
-def parse_value_filter(value_filter: dict, valueSearchParameter: str):
+def parse_value_filter(value_filter: dict, valueSearchParameter: str, first: bool):
     filter_type = value_filter["type"]
-
     fhir_filter_string = ""
+    concat_string = "&"
+
+    if first:
+        concat_string = "?"
 
     # TODO: Implement Unit parsing
     if filter_type == "quantity-comparator":
-        fhir_filter_string += "&" + valueSearchParameter + "=" + \
-            value_filter['comparator'] + str(value_filter['value'])
+        fhir_filter_string += f'{concat_string}{valueSearchParameter}='
+        fhir_filter_string += f'{value_filter["comparator"]}{str(value_filter["value"])}|{value_filter["unit"]["code"]}'
         return fhir_filter_string
     elif filter_type == "quantity-range":
-        fhir_filter_string += "&" + valueSearchParameter + \
-            "=ge" + str(value_filter['minValue'])
-        fhir_filter_string += "&" + valueSearchParameter + \
-            "=le" + str(value_filter['maxValue'])
+        fhir_filter_string += f'{concat_string}{valueSearchParameter}'
+        fhir_filter_string += f'=ge {str(value_filter["minValue"])}|{value_filter["unit"]["code"]}'
+        fhir_filter_string += "&" + valueSearchParameter
+        fhir_filter_string += f'=le {str(value_filter["maxValue"])}|{value_filter["unit"]["code"]}'
         return fhir_filter_string
     elif filter_type == "concept":
-        fhir_filter_string = "&" + valueSearchParameter + "="
-
+        fhir_filter_string = f'{concat_string}{valueSearchParameter}='
         first_concept = value_filter['selectedConcepts'][0]
         value_concepts = f'{first_concept["system"]}|{first_concept["code"]}'
 
         for concept in value_filter['selectedConcepts'][1:]:
-            value_concepts += "," + concept['code']
+            value_concepts += f', {concept["code"]}'
 
         fhir_filter_string += value_concepts
 
@@ -181,21 +181,26 @@ def parse_criterion(json_criterion) -> List[dict]:
     fhir_search_criterion = ""
 
     if not get_hash_from_term_code(json_criterion["termCode"]) in codex_mapping:
-        print("mapping missing for termCode: ", json_criterion["termCode"])
+        print("mapping missing for termCode:", json_criterion["termCode"])
         return fhir_search_criterion
 
     mapping = codex_mapping[get_hash_from_term_code(
         json_criterion["termCode"])]
 
-    fhir_search_criterion += f'{mapping["fhirResourceType"]}?'
+    fhir_search_criterion += f'{mapping["fhirResourceType"]}'
 
     if "valueFilter" in json_criterion:
-        fhir_search_criterion += f'{mapping["termCodeSearchParameter"]}={json_criterion["termCode"]["system"]}|{json_criterion["termCode"]["code"]}'
-        fhir_search_criterion += parse_value_filter(
-            json_criterion['valueFilter'], mapping['valueSearchParameter'])
+
+        if "termCodeSearchParameter" in mapping:
+            fhir_search_criterion += f'?{mapping["termCodeSearchParameter"]}={json_criterion["termCode"]["system"]}|{json_criterion["termCode"]["code"]}'
+            fhir_search_criterion += parse_value_filter(
+                json_criterion['valueFilter'], mapping['valueSearchParameter'], False)
+        else:
+            fhir_search_criterion += parse_value_filter(
+                json_criterion['valueFilter'], mapping['valueSearchParameter'], True)
     else:
-        fhir_search_criterion += mapping['termCodeSearchParameter'] + \
-            "=" + get_codes_for_code(json_criterion["termCode"]['code'], json_criterion["termCode"]['system'])
+        fhir_search_criterion += f'?{mapping["termCodeSearchParameter"]}' + \
+            f'={get_codes_for_code(json_criterion["termCode"]["code"], json_criterion["termCode"]["system"])}'
 
     if "fixedCriteria" in mapping:
         fhir_search_criterion += parse_fixed_criteria(mapping['fixedCriteria'])
