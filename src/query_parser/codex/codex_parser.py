@@ -159,7 +159,7 @@ def parse_value_filter(value_filter: dict, valueSearchParameter: str, first: boo
         value_concepts = f'{first_concept["system"]}|{first_concept["code"]}'
 
         for concept in value_filter['selectedConcepts'][1:]:
-            value_concepts += f', {concept["code"]}'
+            value_concepts += f',{concept["code"]}'
 
         fhir_filter_string += value_concepts
 
