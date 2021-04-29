@@ -142,7 +142,6 @@ def parse_value_filter(value_filter: dict, valueSearchParameter: str, first: boo
     if first:
         concat_string = "?"
 
-    # TODO: Implement Unit parsing
     if filter_type == "quantity-comparator":
         fhir_filter_string += f'{concat_string}{valueSearchParameter}='
         fhir_filter_string += f'{value_filter["comparator"]}{str(value_filter["value"])}|{value_filter["unit"]["code"]}'
