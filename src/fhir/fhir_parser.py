@@ -43,17 +43,26 @@ def _get_resource_type(x_resource: Etree.Element) -> str:
 
 def _extract_id_from_patient(patient: Etree.Element) -> str:
     x_id = patient.find("./ns0:id", ns)
-
-    if x_id is None:
-        x_identifier = patient.find("./ns0:identifier", ns)
-        x_identifier_value = x_identifier.find("./ns0:value", ns)
-        x_id_value = x_identifier_value.attrib["value"]
-    else:
-        x_id_value = x_id.attrib["value"]
+    x_id_value = x_id.attrib["value"]
     return x_id_value
 
-def _extract_id_from_medicationstatement(medicationstatement: Etree.Element) -> str:
+
+def _extract_id_from_element_default(element: Etree.Element) -> str:
     # get reference https://www.hl7.org/fhir/references.html#Reference
+    x_reference_element = element.find(".ns0:subject", ns)
+
+    # Extract only technical reference
+    x_reference = x_reference_element.find("./ns0:reference", ns)
+
+    patient_id = None
+    if x_reference is not None:
+        patient_id = x_reference.attrib["value"].split("/")[-1]
+
+    return patient_id
+
+
+def _extract_id_from_medicationstatement(medicationstatement: Etree.Element) -> str:
+    # get reference https://www.hl7.org/fhir/references.html#Reference 
     x_reference_element = medicationstatement.find(".ns0:subject", ns)
 
     # Extract all tags possibly containing values
@@ -136,10 +145,11 @@ def _extract_resource_from_entry(entry: Etree.Element) -> Etree.Element:
 
 _resource_to_extractor_mapping = {
     "patient": _extract_id_from_patient,
-    "observation": _extract_id_from_observation,
-    "encounter": _extract_id_from_encounter,
-    "condition": _extract_id_from_condition,
-    "medicationstatement": _extract_id_from_medicationstatement
+    "observation": _extract_id_from_element_default,
+    "condition": _extract_id_from_element_default,
+    "medicationstatement": _extract_id_from_element_default,
+    "procedure": _extract_id_from_element_default,
+    "specimen": _extract_id_from_element_default
 }
 
 
