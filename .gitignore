@@ -6,5 +6,6 @@ src/worker/requests/
 virtenv/Include/
 virtenv/**
 FHIR/fhir_responses/
-testdata
+testdata/*
+!testdata/test-all.json
 ontology
