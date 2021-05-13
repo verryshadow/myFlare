@@ -1,41 +1,55 @@
-#import nose2
+#run from codex-flare/src
+from os import close
 import unittest
+import json
 
-from query_parser.codex.codex_parser import load_codex_mapping, get_hash_from_term_code, flatten_tree, get_subtree_for_code, validate_codex_json, parse_codex_query_string, parse_fixed_criteria, parse_value_filter, parse_criterion
+from query_parser.codex.codex_parser import parse_codex_query_string
+from query_parser.codex.codex_parser import curate_codex_json
 
 
-class TestLoadCodexMapping(unittest.TestCase):
-    def test_test(self):
-        print("This is a Tests")
-        # Key in Mapping
-        #self.assertRaises(KeyError, load_codex_mapping, )
+class TestCurateCodexJson(unittest.TestCase):
+    print("Testing code proposal")
 
-class TestGetHashFromTermCode(unittest.TestCase):
-    def test_term_code(self):
-        pass
+    def test_curator(self):
+        testCaseGT_file = open("test/level_one_queries/testCaseGT.json")
+        testCaseGT_data = json.load(testCaseGT_file)
+        #print(testCaseGT_data)
+        
+        
+        testCase_file = open("test/level_one_queries/testCase.json")
+        testCase_data = json.load(testCase_file)
+        print(testCase_data)
+        
+        inclusionData = testCase_data['inclusionCriteria']
+        print(inclusionData)
+        
+        testCase_data.pop("inclusionCriteria")
+        print(testCase_data)
 
-class TestFlattenTree(unittest.TestCase):
-    pass
 
-class TestGetSubtreeForCode(unittest.TestCase):
-    pass
+        out = curate_codex_json(testCase_data)
+        #print(out)
 
-class TestGetCodesForCode(unittest.TestCase):
-    pass
+        #with open("test/level_one_queries/testCase.json", "r") as test_file:
+         #       test = json.load(test_file)
+         #       out = curate_codex_json(test_file.read())
+          #      print(out)
+                #self.assertEqual(test_file.read(), testCasteGTJSON.read())
+                #print(test["inclusionCriteria"])
 
-class TestValidateCodexJson(unittest.TestCase):
-    pass
+        testCase_file.close()
+        testCaseGT_file.close()
 
+'''
 class TestParseCodexQueryString(unittest.TestCase):
+    print("Level 1 Testing")
+
+    def test_json_query(self):
+        with open("test/level_one_queries/testRef.json", "r") as test_file:
+            test = json.load(test_file)
+            #print(test)
+
+
+
     pass
-
-class TestParseFixedCriteria(unittest.TestCase):
-    pass
-
-class TestParseValueFilter(unittest.TestCase):
-    pass
-
-class TestParseCriterion(unittest.TestCase):
-    pass
-
-
+'''

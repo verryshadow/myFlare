@@ -89,6 +89,7 @@ def validate_codex_json(codex: str) -> None:
 
 
 def parse_codex_query_string(codex_json: str) -> List[List[List[dict]]]:
+    curate_codex_json(codex_json)
     validate_codex_json(codex_json)
     codex = json.loads(codex_json)
 
@@ -205,6 +206,30 @@ def parse_criterion(json_criterion) -> List[dict]:
         fhir_search_criterion += parse_fixed_criteria(mapping['fixedCriteria'])
 
     return fhir_search_criterion
+
+def curate_codex_json(codex_json: str):
+    codex_json = remove_empty_elements(codex_json)
+    #inclusionData = codex_json["inclusionCriteria"]
+    #codex_json["inclusionCriteria"] = codex_json["inclusionCriteria"].append(inclusionData)
+    
+    #codex_json.pop("inclusionCriteria", None)
+
+    return codex_json
+    #print(codex_json)
+    #pass
+
+def remove_empty_elements(d):
+    """recursively remove empty lists, empty dicts, or None elements from a dictionary"""
+
+    def empty(x):
+        return x is None or x == {} or x == []
+
+    if not isinstance(d, (dict, list)):
+        return d
+    elif isinstance(d, list):
+        return [v for v in (remove_empty_elements(v) for v in d) if not empty(v)]
+    else:
+        return {k: v for k, v in ((k, remove_empty_elements(v)) for k, v in d.items()) if not empty(v)}
 
 
 load_codex_mapping()
