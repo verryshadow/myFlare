@@ -1,21 +1,20 @@
 {
+    "exclusionCriteria": [],
     "inclusionCriteria": [
-    [
         {
             "termCode": {
-                "code": "81839001",
+                "code": "3QKI37EEHE",
                 "display": "",
-                "system": "http://snomed.info/sct"
+                "system": "http://fdasis.nlm.nih.gov"
             }
         },
         {
             "termCode": {
-                "code": "B01AB13",
+                "code": "870518005",
                 "display": "",
-                "system": "http://fhir.de/CodeSystem/dimdi/atc"
+                "system": "http://snomed.info/sct"
             }
         }
-    ]
     ],
     "version": ""
 }

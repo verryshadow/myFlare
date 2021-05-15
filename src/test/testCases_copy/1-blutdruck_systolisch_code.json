@@ -1,21 +1,20 @@
 {
+    "exclusionCriteria": [],
     "inclusionCriteria": [
-    [
         {
             "termCode": {
-                "code": "81839001",
+                "code": "85354-9",
                 "display": "",
-                "system": "http://snomed.info/sct"
+                "system": "http://loinc.org"
             }
         },
         {
             "termCode": {
-                "code": "B01AB13",
+                "code": "75367002",
                 "display": "",
-                "system": "http://fhir.de/CodeSystem/dimdi/atc"
+                "system": "http://snomed.info/sct"
             }
         }
-    ]
     ],
     "version": ""
 }

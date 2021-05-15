@@ -9,8 +9,10 @@ from requests import Response
 from fhir.fhir_query_gen import fhir_format
 from fhir.namespace import ns
 
+from urllib.parse import urlparse
+
 urllib3.disable_warnings()
-server_base_url = os.environ.get("FHIR_BASE_URL") or "http://localhost:5555/fhir"
+server_base_url = os.environ.get("FHIR_BASE_URL") or "http://localhost:8081/fhir"
 
 
 # TODO: Create parallel requests with user config.
@@ -45,6 +47,7 @@ def _execute_single_query(paged_query_url: str) -> Tuple[Optional[str], Etree.El
     :raises RequestUnsuccessfulError: raised when response code is not 200
     :return: URL to the next page if the response contains one and the response to the given query
     """
+    paged_query_url = paged_query_url.replace("|", "%7c")
     response = requests.get(paged_query_url, verify=False)
     if response.status_code != 200:
         raise RequestUnsuccessfulError(response, f"failed request on url: {paged_query_url}")

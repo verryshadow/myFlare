@@ -1,21 +1,20 @@
 {
+    "exclusionCriteria": [],
     "inclusionCriteria": [
-    [
         {
             "termCode": {
-                "code": "81839001",
+                "code": "A11CC06",
                 "display": "",
-                "system": "http://snomed.info/sct"
+                "system": "http://fhir.de/CodeSystem/dimdi/atc"
             }
         },
         {
             "termCode": {
-                "code": "B01AB13",
+                "code": "88519001",
                 "display": "",
-                "system": "http://fhir.de/CodeSystem/dimdi/atc"
+                "system": "http://snomed.info/sct"
             }
         }
-    ]
     ],
     "version": ""
 }

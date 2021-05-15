@@ -1,21 +1,20 @@
 {
+    "exclusionCriteria": [],
     "inclusionCriteria": [
-    [
         {
             "termCode": {
-                "code": "81839001",
+                "code": "CT",
                 "display": "",
-                "system": "http://snomed.info/sct"
+                "system": "http://dicom.nema.org/resources/ontology/DCM"
             }
         },
         {
             "termCode": {
-                "code": "B01AB13",
+                "code": "77477000:363704007=39607008",
                 "display": "",
-                "system": "http://fhir.de/CodeSystem/dimdi/atc"
+                "system": "http://snomed.info/sct"
             }
         }
-    ]
     ],
     "version": ""
 }

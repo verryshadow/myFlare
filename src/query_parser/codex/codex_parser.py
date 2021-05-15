@@ -89,8 +89,10 @@ def validate_codex_json(codex: str) -> None:
 
 
 def parse_codex_query_string(codex_json: str) -> List[List[List[dict]]]:
-    curate_codex_json(codex_json)
+    
+    codex_json = curate_codex_json(codex_json)
     validate_codex_json(codex_json)
+    
     codex = json.loads(codex_json)
 
     src_inclusion_criteria = codex["inclusionCriteria"]
@@ -123,7 +125,6 @@ def parse_fixed_criteria(fixed_criteria: dict):
     fhir_fixed_string = ""
 
     for criterion in fixed_criteria:
-
         first_value = criterion['value'][0]['code']
         criterion_values = str(first_value)
 
@@ -208,15 +209,21 @@ def parse_criterion(json_criterion) -> List[dict]:
     return fhir_search_criterion
 
 def curate_codex_json(codex_json: str):
-    codex_json = remove_empty_elements(codex_json)
-    #inclusionData = codex_json["inclusionCriteria"]
-    #codex_json["inclusionCriteria"] = codex_json["inclusionCriteria"].append(inclusionData)
-    
-    #codex_json.pop("inclusionCriteria", None)
 
+    codex_json_dict = json.loads(codex_json)
+    codex_json_dict = remove_empty_elements(codex_json_dict)
+
+    if 'exclusionCriteria' in codex_json_dict and not isinstance(codex_json_dict['exclusionCriteria'][0], list):
+        exclusionData = codex_json_dict['exclusionCriteria']
+        codex_json_dict["exclusionCriteria"] = [exclusionData]
+
+    if 'inclusionCriteria' in codex_json_dict and not isinstance(codex_json_dict['inclusionCriteria'][0], list):
+        inclusionData = codex_json_dict['inclusionCriteria']
+        codex_json_dict['inclusionCriteria'] = [inclusionData]
+
+    codex_json = json.dumps(codex_json_dict)
     return codex_json
-    #print(codex_json)
-    #pass
+
 
 def remove_empty_elements(d):
     """recursively remove empty lists, empty dicts, or None elements from a dictionary"""

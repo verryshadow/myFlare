@@ -1,23 +1,27 @@
-curl --location --request POST 'http://localhost:5000/query-sync' \
---header 'Content-Type: codex/json' \
---header 'Accept: internal/json' \
---data-raw '{
+{
     "exclusionCriteria": [],
     "inclusionCriteria": [
         {
             "termCode": {
-                "code": "81839001",
+                "code": "J05AB06",
                 "display": "",
-                "system": "http://snomed.info/sct"
+                "system": "http://fhir.de/CodeSystem/dimdi/atc"
             }
         },
         {
             "termCode": {
-                "code": "B01AB13",
+                "code": "S01AD09",
                 "display": "",
                 "system": "http://fhir.de/CodeSystem/dimdi/atc"
+            }
+        },
+        {
+            "termCode": {
+                "code": "78025001",
+                "display": "",
+                "system": "http://snomed.info/sct"
             }
         }
     ],
     "version": ""
-}'
+}
