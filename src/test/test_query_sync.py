@@ -24,48 +24,6 @@ class TestRunCodexQuery(unittest.TestCase):
         query_syntax = content_type_to_query_syntax(content_type)
         accept = "internal/json"
         response_type = accept_to_response_type(accept)
-        
-
-
-        url = 'http://localhost:5000/query-sync'
-        myobj = {
-        "exclusionCriteria": [],
-        "inclusionCriteria": [
-          {
-                "termCode": {
-                    "code": "81839001",
-                    "display": "",
-                    "system": "http://snomed.info/sct"
-                }
-            },
-            {
-                "termCode": {
-                    "code": "B01AB13",
-                    "display": "",
-                    "system": "http://fhir.de/CodeSystem/dimdi/atc"
-                }
-            }
-        ],
-        "version": ""
-        }
-
-        
-
-        x = requests.post(url, data = myobj)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
         path = "test/testCases_copy"
         extension = "json"
@@ -80,6 +38,7 @@ class TestRunCodexQuery(unittest.TestCase):
                     query_input = f.read()
                     #query_input = query_input.decode("iso-8859-1")
                     testCase_content_list.append(query_input)
+
 
                     queue_insertion_time: int = time.time_ns()
                     uuid: UUID = uuid4()
