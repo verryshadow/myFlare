@@ -242,6 +242,6 @@ def remove_empty_elements(d):
 load_codex_mapping()
 
 if __name__ == "__main__":
-    with open("query_parser/codex/example2.json", "r") as codex_json_file:
+    with open("../example-queries/specimen-example.json", "r") as codex_json_file:
         cdx = parse_codex_query_string(codex_json_file.read())
         print(cdx)

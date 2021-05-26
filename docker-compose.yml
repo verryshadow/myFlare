@@ -7,7 +7,7 @@ services:
       - ${PORT_FLARE:-127.0.0.1:5000}:5000
     environment:
       FHIR_BASE_URL: ${FHIR_BASE_URL:-http://fhir-server:8080/fhir}
-      DEBUG: ${FLARE_DEBUG:-}
+      DEBUG: ${FLARE_DEBUG:---debug}
     build: .
     restart: always
     volumes:
@@ -16,7 +16,7 @@ services:
       - ${CODEX_TERM_CODE_MAPPING_PATH:-./src/query_parser/codex/codex-mapping.json}:/opt/flare/src/query_parser/codex/codex-mapping.json
 
   fhir-server:
-    image: ghcr.io/chgl/hapi/hapi-fhir-jpaserver-starter:5.2.0-distroless
+    image: ghcr.io/chgl/hapifhir/hapi-fhir-jpaserver-starter:v5.4.0-distroless
     restart: always
     ports:
       - ${PORT_HAPI_FHIR:-127.0.0.1:8081}:8080
