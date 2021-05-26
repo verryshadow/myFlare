@@ -1,41 +1,53 @@
-#import nose2
+#run from codex-flare/src
+from os import close
 import unittest
+import json
 
-from query_parser.codex.codex_parser import load_codex_mapping, get_hash_from_term_code, flatten_tree, get_subtree_for_code, validate_codex_json, parse_codex_query_string, parse_fixed_criteria, parse_value_filter, parse_criterion
+from query_parser.codex.codex_parser import parse_codex_query_string
+from query_parser.codex.codex_parser import curate_codex_json
 
 
-class TestLoadCodexMapping(unittest.TestCase):
-    def test_test(self):
-        print("This is a Tests")
-        # Key in Mapping
-        #self.assertRaises(KeyError, load_codex_mapping, )
+class TestCurateCodexJson(unittest.TestCase):
+    def test_curator(self):
+        print("Starting Curation Test!")
+        testCaseGT_file = open("test/level_one_queries/testCaseGT.json")
+        testCaseGT_data = json.load(testCaseGT_file)
+        testCaseGT_string = json.dumps(testCaseGT_data)
+        #testCaseGT_string = testCaseGT_string.replace('"', "'")
 
-class TestGetHashFromTermCode(unittest.TestCase):
-    def test_term_code(self):
-        pass
+        testCase_file = open("test/level_one_queries/testCase.json")
+        testCase_data = json.load(testCase_file)
+        testCase_string = json.dumps(testCase_data)
+        
+        out = curate_codex_json(testCase_string)
+        #print(out)
+        self.maxDiff=None
+        message = "Curation did not work! Check single vs double quotes in json.dumps"
+        '''
+        print(out)
+        print(testCaseGT_string)
+        print(type(out))
+        print(type(testCaseGT_string))
+        '''
+        self.assertEqual(out, testCaseGT_string, message)
+        print("Curation Test finished!")
 
-class TestFlattenTree(unittest.TestCase):
-    pass
+        testCase_file.close()
+        testCaseGT_file.close()
 
-class TestGetSubtreeForCode(unittest.TestCase):
-    pass
-
-class TestGetCodesForCode(unittest.TestCase):
-    pass
-
-class TestValidateCodexJson(unittest.TestCase):
-    pass
-
+'''
 class TestParseCodexQueryString(unittest.TestCase):
+    print("Start Level 1 Testing!")
+
+    def test_json_query(self):
+        with open("test/level_one_queries/testCaseGT.json", "r") as test_file:
+            test = json.load(test_file)
+            print(test)
+            test_string = json.dumps(test)
+            out = parse_codex_query_string(test_string)
+            print(out)
+
+
+    print("Level 1 Testing finished!")
     pass
-
-class TestParseFixedCriteria(unittest.TestCase):
-    pass
-
-class TestParseValueFilter(unittest.TestCase):
-    pass
-
-class TestParseCriterion(unittest.TestCase):
-    pass
-
-
+'''

@@ -12,8 +12,10 @@ from urllib.parse import parse_qsl
 from fhir.fhir_query_gen import fhir_format
 from fhir.namespace import ns
 
+from urllib.parse import urlparse
+
 urllib3.disable_warnings()
-server_base_url = os.environ.get("FHIR_BASE_URL") or "http://localhost:5555/fhir"
+server_base_url = os.environ.get("FHIR_BASE_URL") or "http://localhost:8081/fhir"
 
 
 # TODO: Create parallel requests with user config.
@@ -48,7 +50,7 @@ def _execute_single_query(paged_query_url: str) -> Tuple[Optional[str], Etree.El
     :raises RequestUnsuccessfulError: raised when response code is not 200
     :return: URL to the next page if the response contains one and the response to the given query
     """
-    
+
     parsed_url = urlparse(paged_query_url)
     new_q = parsed_url._replace(path=parsed_url.path + "/_search", query='')
     params = dict(parse_qsl(parsed_url.query))
