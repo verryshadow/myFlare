@@ -5,6 +5,9 @@ import requests
 import urllib3
 import os
 from requests import Response
+from urllib.parse import urlparse
+from urllib.parse import urlunparse
+from urllib.parse import parse_qsl
 
 from fhir.fhir_query_gen import fhir_format
 from fhir.namespace import ns
@@ -45,7 +48,12 @@ def _execute_single_query(paged_query_url: str) -> Tuple[Optional[str], Etree.El
     :raises RequestUnsuccessfulError: raised when response code is not 200
     :return: URL to the next page if the response contains one and the response to the given query
     """
-    response = requests.get(paged_query_url, verify=False)
+    
+    parsed_url = urlparse(paged_query_url)
+    new_q = parsed_url._replace(path=parsed_url.path + "/_search", query='')
+    params = dict(parse_qsl(parsed_url.query))
+    response = requests.post(urlunparse(new_q), params=params, verify=False)
+
     if response.status_code != 200:
         raise RequestUnsuccessfulError(response, f"failed request on url: {paged_query_url}")
 
