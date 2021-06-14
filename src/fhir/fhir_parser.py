@@ -74,6 +74,7 @@ def _extract_id_from_element_default(element: Etree.Element) -> str:
     return patient_id
 
 
+
 def _extract_id_from_medicationstatement(medicationstatement: Etree.Element) -> str:
     # get reference https://www.hl7.org/fhir/references.html#Reference 
     x_reference_element = medicationstatement.find(".ns0:subject", ns)
@@ -93,6 +94,7 @@ def _extract_id_from_medicationstatement(medicationstatement: Etree.Element) -> 
 
     return patient_id
 
+
 def _extract_id_from_observation(observation: Etree.Element) -> str:
     # get reference https://www.hl7.org/fhir/references.html#Reference
     x_reference_element = observation.find(".ns0:subject", ns)
@@ -111,6 +113,7 @@ def _extract_id_from_observation(observation: Etree.Element) -> str:
         patient_id = x_reference.attrib["value"].split("/")[-1]
 
     return patient_id
+
 
 def _extract_id_from_condition(condition: Etree.Element) -> str:
     # get reference https://www.hl7.org/fhir/references.html#Reference
@@ -164,7 +167,8 @@ _resource_to_extractor_mapping = {
     "procedure": _extract_id_from_element_default,
     "specimen": _extract_id_from_element_default,
     "immunization": _extract_id_from_element_patient,
-    "consent": _extract_id_from_element_patient
+    "consent": _extract_id_from_element_patient,
+    "diagnosticreport": _extract_id_from_element_default
 }
 
 

@@ -13,7 +13,7 @@ services:
     volumes:
       - ./src:/opt/flare/src
       - ${CODEX_CONCEPT_TREE_PATH:-./src/query_parser/codex/codex-code-tree.json}:/opt/flare/src/query_parser/codex/codex-code-tree.json
-      - ${CODEX_TERM_CODE_MAPPING_PATH:-./src/query_parser/codex/codex-mapping.json}:/opt/flare/src/query_parser/codex/codex-mapping.json
+      - ${CODEX_TERM_CODE_MAPPING_PATH:-./src/query_parser/codex/codex-term-code-mapping.json}:/opt/flare/src/query_parser/codex/codex-term-code-mapping.json
 
   fhir-server:
     image: ghcr.io/chgl/hapifhir/hapi-fhir-jpaserver-starter:v5.4.0-distroless

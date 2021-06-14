@@ -1,0 +1,21 @@
+{
+    "inclusionCriteria": [
+        [
+            {
+                "termCode": {
+                    "code": "J05AB06",
+                    "display": "",
+                    "system": "http://fhir.de/CodeSystem/dimdi/atc"
+                }
+            },
+            {
+                "termCode": {
+                    "code": "S01AD09",
+                    "display": "",
+                    "system": "http://fhir.de/CodeSystem/dimdi/atc"
+                }
+            }
+        ]
+    ],
+    "version": "http://to_be_decided.com/draft-1/schema#"
+}
