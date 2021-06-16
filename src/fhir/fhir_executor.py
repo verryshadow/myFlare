@@ -29,7 +29,7 @@ def execute_fhir_query(query: str) -> List[Etree.Element]:
     """
     ret = []
 
-    next_query = f'{server_base_url}/{query}&format={fhir_format}'
+    next_query = f'{server_base_url}/{query}&{fhir_format}'
 
     
 
