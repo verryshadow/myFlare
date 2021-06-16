@@ -31,18 +31,19 @@ def execute_fhir_query(query: str) -> List[Etree.Element]:
 
     next_query = f'{server_base_url}/{query}&{fhir_format}'
 
-    
+    init = True
 
     # Execute queries as long as there is a next page
     while next_query is not None:
-        next_query, x_response = _execute_single_query(next_query)
+        next_query, x_response = _execute_single_query(next_query, init)
         # persist_query_response(x_response)
         ret.append(x_response)
+        init = False
 
     return ret
 
 
-def _execute_single_query(paged_query_url: str) -> Tuple[Optional[str], Etree.Element]:
+def _execute_single_query(paged_query_url: str, init) -> Tuple[Optional[str], Etree.Element]:
     """
     Executes a single FHIR query and attempts to extract the URL to the next page
 
@@ -52,7 +53,12 @@ def _execute_single_query(paged_query_url: str) -> Tuple[Optional[str], Etree.El
     """
 
     parsed_url = urlparse(paged_query_url)
-    new_q = parsed_url._replace(path=parsed_url.path + "/_search", query='')
+
+    new_q = parsed_url._replace(path=parsed_url.path + "?_format=xml", query='')
+
+    if init:
+        new_q = parsed_url._replace(path=parsed_url.path + "/_search?_format=xml", query='')
+
     params = dict(parse_qsl(parsed_url.query))
     response = requests.post(urlunparse(new_q), data=params, verify=False)
 

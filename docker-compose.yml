@@ -16,20 +16,16 @@ services:
       - ${CODEX_TERM_CODE_MAPPING_PATH:-./src/query_parser/codex/codex-mapping.json}:/opt/flare/src/query_parser/codex/codex-mapping.json
 
   fhir-server:
-    image: ghcr.io/chgl/hapifhir/hapi-fhir-jpaserver-starter:v5.4.0-distroless
-    restart: always
-    ports:
-      - ${PORT_HAPI_FHIR:-127.0.0.1:8081}:8080
+    container_name: fhir-server
+    image: "samply/blaze:0.11.0-alpha.6"
     environment:
-      SPRING_DATASOURCE_URL: "jdbc:postgresql://db:5432/fhir?currentSchema=public"
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-      SPRING_DATASOURCE_DRIVERCLASSNAME: org.postgresql.Driver
-      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQL10Dialect
-      VALIDATION_REQUESTS_ENABLED: "false"
-      HAPI_FHIR_USE_APACHE_ADDRESS_STRATEGY: "true"
-    depends_on:
-      - db
+      BASE_URL: "http://fhir-server:8080"
+      JAVA_TOOL_OPTIONS: "-Xmx4g"
+      LOG_LEVEL: debug
+    ports:
+    - ${PORT_BLAZE_FHIR:-127.0.0.1:8081}:8080
+    volumes:
+    - "blaze-data:/app/data"
 
   db:
     image: postgres:12.6-alpine
@@ -37,3 +33,6 @@ services:
     environment:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: fhir
+
+volumes:
+  blaze-data:
