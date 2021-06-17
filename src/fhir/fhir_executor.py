@@ -16,6 +16,8 @@ from urllib.parse import urlparse
 
 urllib3.disable_warnings()
 server_base_url = os.environ.get("FHIR_BASE_URL") or "http://localhost:8081/fhir"
+server_user = os.environ.get("FHIR_USER") or ""
+server_pw = os.environ.get("FHIR_PW") or ""
 
 
 # TODO: Create parallel requests with user config.
@@ -24,7 +26,7 @@ def execute_fhir_query(query: str) -> List[Etree.Element]:
     """
     Executes a FHIR query, fetches all pages
 
-    :param query: query to be executed
+    :param query: query to be executed 
     :return: List of FHIR-bundles in xml format returned by the FHIR server
     """
     ret = []
@@ -54,17 +56,23 @@ def _execute_single_query(paged_query_url: str, init) -> Tuple[Optional[str], Et
 
     parsed_url = urlparse(paged_query_url)
 
-    new_q = parsed_url._replace(path=parsed_url.path + "?_format=xml", query='')
+    new_q = parsed_url._replace(path=parsed_url.path, query='')
 
     if init:
-        new_q = parsed_url._replace(path=parsed_url.path + "/_search?_format=xml", query='')
+        new_q = parsed_url._replace(path=parsed_url.path + "/_search", query='')
 
     params = dict(parse_qsl(parsed_url.query))
-    response = requests.post(urlunparse(new_q), data=params, verify=False)
+    headers = {'Accept': 'application/fhir+xml'}
+
+    auth = None
+
+    if server_user != '':
+        auth = (server_user, server_pw)
+
+    response = requests.post(urlunparse(new_q), data=params, verify=False, headers=headers, auth=auth)
 
     if response.status_code != 200:
         raise RequestUnsuccessfulError(response, f"failed request on url: {paged_query_url}")
-
     x_response = Etree.fromstring(response.text)
     return get_next_page_url(x_response), x_response
 
@@ -78,7 +86,7 @@ def get_next_page_url(x_response: Etree.Element) -> Optional[str]:
     """
     x_next = x_response.find("./ns0:link/ns0:relation[@value='next']/../ns0:url", ns)
     if x_next is not None:
-        url = x_next.attrib["value"] + "&" + fhir_format
+        url = x_next.attrib["value"]
         return url
     return None
 

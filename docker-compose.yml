@@ -8,12 +8,14 @@ services:
     environment:
       FHIR_BASE_URL: ${FHIR_BASE_URL:-http://fhir-server:8080/fhir}
       DEBUG: ${FLARE_DEBUG:---debug}
+      FHIR_USER: ${FHIR_USER:-}
+      FHIR_PW: ${FHIR_PW:-}
     build: .
     restart: always
     volumes:
       - ./src:/opt/flare/src
       - ${CODEX_CONCEPT_TREE_PATH:-./src/query_parser/codex/codex-code-tree.json}:/opt/flare/src/query_parser/codex/codex-code-tree.json
-      - ${CODEX_TERM_CODE_MAPPING_PATH:-./src/query_parser/codex/codex-mapping.json}:/opt/flare/src/query_parser/codex/codex-mapping.json
+      - ${CODEX_TERM_CODE_MAPPING_PATH:-./src/query_parser/codex/codex-term-code-mapping.json}:/opt/flare/src/query_parser/codex/codex-term-code-mapping.json
 
   fhir-server:
     container_name: fhir-server
