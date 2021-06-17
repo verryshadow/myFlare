@@ -14,7 +14,7 @@ codex_mapping = {}
 
 
 def load_codex_mapping():
-    with open("query_parser/codex/codex-mapping.json", "r") as mapping_file:
+    with open("query_parser/codex/codex-term-code-mapping.json", "r") as mapping_file:
         codex_mapping_input = json.load(mapping_file)
 
         for mapping in codex_mapping_input:
@@ -31,7 +31,6 @@ def get_hash_from_term_code(term_code):
 
 
 def flatten_tree(tree: dict, code_string: str):
-
     if 'children' in tree:
         for child in tree['children']:
             if 'termCode' in child and child['termCode']['code'] is not None:
@@ -47,7 +46,6 @@ def flatten_tree(tree: dict, code_string: str):
 
 
 def get_subtree_for_code(tree: dict, search_string: str):
-
     found_tree = None
 
     if 'children' in tree:
@@ -64,7 +62,6 @@ def get_subtree_for_code(tree: dict, search_string: str):
 
 
 def get_codes_for_code(code, system):
-
     sub_tree = get_subtree_for_code(ontology, code)
 
     if sub_tree is None:
@@ -76,6 +73,7 @@ def get_codes_for_code(code, system):
         return f'{system}|{code}'
 
     return f'{system}|{code},{flattened_subtree}'
+
 
 def validate_codex_json(codex: str) -> None:
     """
@@ -89,12 +87,8 @@ def validate_codex_json(codex: str) -> None:
 
 
 def parse_codex_query_string(codex_json: str) -> List[List[List[dict]]]:
-    
-    #removed codex json curator to adapt for miss configured json test cases
-    #will not be part of the code source
-    #codex_json = curate_codex_json(codex_json)
     validate_codex_json(codex_json)
-    
+
     codex = json.loads(codex_json)
 
     src_inclusion_criteria = codex["inclusionCriteria"]
@@ -143,12 +137,27 @@ def parse_value_filter(value_filter: dict, valueSearchParameter: str, first: boo
     fhir_filter_string = ""
     concat_string = "&"
 
+    # FIXME: It would better to have a composite filter_type probably even composite quantity and concept
+    if valueSearchParameter == "component-code-value-concept":
+        fhir_filter_string += f'${value_filter["comparator"]}{str(value_filter["value"])}|{value_filter["unit"]["code"]}'
+        return fhir_filter_string
+    elif valueSearchParameter == "mii-provision-provision-code-type":
+        first_concept = value_filter['selectedConcepts'][0]
+        value_concepts = f'${first_concept["system"]}|{first_concept["code"]}'
+        for concept in value_filter['selectedConcepts'][1:]:
+            value_concepts += f',{concept["code"]}'
+        fhir_filter_string += value_concepts
+        return fhir_filter_string
+
     if first:
         concat_string = "?"
 
     if filter_type == "quantity-comparator":
         fhir_filter_string += f'{concat_string}{valueSearchParameter}='
-        fhir_filter_string += f'{value_filter["comparator"]}{str(value_filter["value"])}|{value_filter["unit"]["code"]}'
+        if "unit" in value_filter:
+            fhir_filter_string += f'{value_filter["comparator"]}{str(value_filter["value"])}|{value_filter["unit"]["code"]}'
+        else:
+            fhir_filter_string += f'{value_filter["comparator"]}{str(value_filter["value"])}'
         return fhir_filter_string
     elif filter_type == "quantity-range":
         fhir_filter_string += f'{concat_string}{valueSearchParameter}'
@@ -180,7 +189,6 @@ class ValueFilterNotFound(Exception):
 
 
 def parse_criterion(json_criterion) -> List[dict]:
-
     fhir_search_criterion = ""
 
     if not get_hash_from_term_code(json_criterion["termCode"]) in codex_mapping:
@@ -203,28 +211,12 @@ def parse_criterion(json_criterion) -> List[dict]:
                 json_criterion['valueFilter'], mapping['valueSearchParameter'], True)
     else:
         fhir_search_criterion += f'?{mapping["termCodeSearchParameter"]}' + \
-            f'={get_codes_for_code(json_criterion["termCode"]["code"], json_criterion["termCode"]["system"])}'
+                                 f'={get_codes_for_code(json_criterion["termCode"]["code"], json_criterion["termCode"]["system"])}'
 
     if "fixedCriteria" in mapping:
         fhir_search_criterion += parse_fixed_criteria(mapping['fixedCriteria'])
 
     return fhir_search_criterion
-
-def curate_codex_json(codex_json: str):
-
-    codex_json_dict = json.loads(codex_json)
-    codex_json_dict = remove_empty_elements(codex_json_dict)
-
-    if 'exclusionCriteria' in codex_json_dict and not isinstance(codex_json_dict['exclusionCriteria'][0], list):
-        exclusionData = codex_json_dict['exclusionCriteria']
-        codex_json_dict["exclusionCriteria"] = [exclusionData]
-
-    if 'inclusionCriteria' in codex_json_dict and not isinstance(codex_json_dict['inclusionCriteria'][0], list):
-        inclusionData = codex_json_dict['inclusionCriteria']
-        codex_json_dict['inclusionCriteria'] = [inclusionData]
-
-    codex_json = json.dumps(codex_json_dict)
-    return codex_json
 
 
 def remove_empty_elements(d):

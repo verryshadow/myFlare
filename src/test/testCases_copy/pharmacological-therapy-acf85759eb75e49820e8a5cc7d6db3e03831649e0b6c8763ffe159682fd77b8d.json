@@ -1,0 +1,14 @@
+{
+    "inclusionCriteria": [
+        [
+            {
+                "termCode": {
+                    "code": "J05AR10",
+                    "display": "",
+                    "system": "http://fhir.de/CodeSystem/dimdi/atc"
+                }
+            }
+        ]
+    ],
+    "version": "http://to_be_decided.com/draft-1/schema#"
+}

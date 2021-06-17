@@ -1,0 +1,24 @@
+{
+    "inclusionCriteria": [
+        [
+            {
+                "termCode": {
+                    "code": "8691-8",
+                    "display": "",
+                    "system": "http://loinc.org"
+                },
+                "valueFilter": {
+                    "selectedConcepts": [
+                        {
+                            "code": "AO",
+                            "display": "Angola",
+                            "system": "urn:iso:std:iso:3166"
+                        }
+                    ],
+                    "type": "concept"
+                }
+            }
+        ]
+    ],
+    "version": "http://to_be_decided.com/draft-1/schema#"
+}

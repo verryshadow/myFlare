@@ -60,11 +60,11 @@ def _execute_single_query(paged_query_url: str, init) -> Tuple[Optional[str], Et
         new_q = parsed_url._replace(path=parsed_url.path + "/_search?_format=xml", query='')
 
     params = dict(parse_qsl(parsed_url.query))
-    response = requests.post(urlunparse(new_q), data=params, verify=False)
+    # FIXME Post search should return xml format but this requires having a parameter
+    response = requests.post(urlunparse(new_q) + "?_format=xml", data=params, verify=False)
 
     if response.status_code != 200:
         raise RequestUnsuccessfulError(response, f"failed request on url: {paged_query_url}")
-
     x_response = Etree.fromstring(response.text)
     return get_next_page_url(x_response), x_response
 
