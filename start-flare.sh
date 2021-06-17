@@ -6,7 +6,7 @@ cd codex-flare
 export FLARE_DEBUG=--debug
 
 export CODEX_CONCEPT_TREE_PATH=${CODEX_CONCEPT_TREE_PATH:-"$baseDir/ontology/codex-code-tree.json"}
-export CODEX_TERM_CODE_MAPPING_PATH=${CODEX_TERM_CODE_MAPPING_PATH:-"$baseDir/ontology/term-code-mapping.json"}
+export CODEX_TERM_CODE_MAPPING_PATH=${CODEX_TERM_CODE_MAPPING_PATH:-"$baseDir/ontology/codex-term-code-mapping.json"}
 
 
 echo "export CODEX_CONCEPT_TREE_PATH=$CODEX_CONCEPT_TREE_PATH"
