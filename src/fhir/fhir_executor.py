@@ -54,13 +54,14 @@ def _execute_single_query(paged_query_url: str, init) -> Tuple[Optional[str], Et
 
     parsed_url = urlparse(paged_query_url)
 
-    new_q = parsed_url._replace(path=parsed_url.path + "?_format=xml", query='')
+    new_q = parsed_url._replace(path=parsed_url.path, query='')
 
     if init:
-        new_q = parsed_url._replace(path=parsed_url.path + "/_search?_format=xml", query='')
+        new_q = parsed_url._replace(path=parsed_url.path + "/_search", query='')
 
     params = dict(parse_qsl(parsed_url.query))
-    response = requests.post(urlunparse(new_q), data=params, verify=False)
+    headers = {'Accept': 'application/fhir+xml'}
+    response = requests.post(urlunparse(new_q), data=params, verify=False, headers=headers)
 
     if response.status_code != 200:
         raise RequestUnsuccessfulError(response, f"failed request on url: {paged_query_url}")
@@ -77,7 +78,7 @@ def get_next_page_url(x_response: Etree.Element) -> Optional[str]:
     """
     x_next = x_response.find("./ns0:link/ns0:relation[@value='next']/../ns0:url", ns)
     if x_next is not None:
-        url = x_next.attrib["value"] + "&" + fhir_format
+        url = x_next.attrib["value"]
         return url
     return None
 
