@@ -16,6 +16,8 @@ from urllib.parse import urlparse
 
 urllib3.disable_warnings()
 server_base_url = os.environ.get("FHIR_BASE_URL") or "http://localhost:8081/fhir"
+server_user = os.environ.get("FHIR_USER") or ""
+server_pw = os.environ.get("FHIR_PW") or ""
 
 
 # TODO: Create parallel requests with user config.
@@ -24,7 +26,7 @@ def execute_fhir_query(query: str) -> List[Etree.Element]:
     """
     Executes a FHIR query, fetches all pages
 
-    :param query: query to be executed
+    :param query: query to be executed 
     :return: List of FHIR-bundles in xml format returned by the FHIR server
     """
     ret = []
@@ -61,7 +63,13 @@ def _execute_single_query(paged_query_url: str, init) -> Tuple[Optional[str], Et
 
     params = dict(parse_qsl(parsed_url.query))
     headers = {'Accept': 'application/fhir+xml'}
-    response = requests.post(urlunparse(new_q), data=params, verify=False, headers=headers)
+
+    auth = None
+
+    if server_user != '':
+        auth = (server_user, server_pw)
+
+    response = requests.post(urlunparse(new_q), data=params, verify=False, headers=headers, auth=auth)
 
     if response.status_code != 200:
         raise RequestUnsuccessfulError(response, f"failed request on url: {paged_query_url}")
