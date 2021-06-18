@@ -31,8 +31,7 @@ def execute_fhir_query(query: str) -> List[Etree.Element]:
     """
     ret = []
 
-    next_query = f'{server_base_url}/{query}&{fhir_format}'
-
+    next_query = f'{server_base_url}/{query}'
     init = True
 
     # Execute queries as long as there is a next page
@@ -62,7 +61,7 @@ def _execute_single_query(paged_query_url: str, init) -> Tuple[Optional[str], Et
         new_q = parsed_url._replace(path=parsed_url.path + "/_search", query='')
 
     params = dict(parse_qsl(parsed_url.query))
-    headers = {'Accept': 'application/fhir+xml'}
+    headers = {'Accept': 'application/fhir+xml', 'Prefer': 'handling=strict'}
 
     auth = None
 
