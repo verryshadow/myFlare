@@ -16,6 +16,8 @@ from urllib.parse import urlparse
 
 urllib3.disable_warnings()
 server_base_url = os.environ.get("FHIR_BASE_URL") or "http://localhost:8081/fhir"
+server_user = os.environ.get("FHIR_USER") or ""
+server_pw = os.environ.get("FHIR_PW") or ""
 
 
 # TODO: Create parallel requests with user config.
@@ -24,25 +26,26 @@ def execute_fhir_query(query: str) -> List[Etree.Element]:
     """
     Executes a FHIR query, fetches all pages
 
-    :param query: query to be executed
+    :param query: query to be executed 
     :return: List of FHIR-bundles in xml format returned by the FHIR server
     """
     ret = []
 
-    next_query = f'{server_base_url}/{query}&_format=xml'
+    next_query = f'{server_base_url}/{query}&{fhir_format}'
 
-    
+    init = True
 
     # Execute queries as long as there is a next page
     while next_query is not None:
-        next_query, x_response = _execute_single_query(next_query)
+        next_query, x_response = _execute_single_query(next_query, init)
         # persist_query_response(x_response)
         ret.append(x_response)
+        init = False
 
     return ret
 
 
-def _execute_single_query(paged_query_url: str) -> Tuple[Optional[str], Etree.Element]:
+def _execute_single_query(paged_query_url: str, init) -> Tuple[Optional[str], Etree.Element]:
     """
     Executes a single FHIR query and attempts to extract the URL to the next page
 
@@ -52,10 +55,21 @@ def _execute_single_query(paged_query_url: str) -> Tuple[Optional[str], Etree.El
     """
 
     parsed_url = urlparse(paged_query_url)
-    new_q = parsed_url._replace(path=parsed_url.path + "/_search", query='')
+
+    new_q = parsed_url._replace(path=parsed_url.path, query='')
+
+    if init:
+        new_q = parsed_url._replace(path=parsed_url.path + "/_search", query='')
+
     params = dict(parse_qsl(parsed_url.query))
-    # FIXME Post search should return xml format but this requires having a parameter
-    response = requests.post(urlunparse(new_q) + "?_format=xml", data=params, verify=False)
+    headers = {'Accept': 'application/fhir+xml'}
+
+    auth = None
+
+    if server_user != '':
+        auth = (server_user, server_pw)
+
+    response = requests.post(urlunparse(new_q), data=params, verify=False, headers=headers, auth=auth)
 
     if response.status_code != 200:
         raise RequestUnsuccessfulError(response, f"failed request on url: {paged_query_url}")
@@ -72,7 +86,7 @@ def get_next_page_url(x_response: Etree.Element) -> Optional[str]:
     """
     x_next = x_response.find("./ns0:link/ns0:relation[@value='next']/../ns0:url", ns)
     if x_next is not None:
-        url = x_next.attrib["value"] + "&" + fhir_format
+        url = x_next.attrib["value"]
         return url
     return None
 

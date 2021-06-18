@@ -3,12 +3,12 @@ name: CI
 on:
   push:
     branches:
-    - master
+    - main
     tags:
     - v[0-9]+.[0-9]+.[0-9]+**
   pull_request:
     branches:
-    - master
+    - main
 
 jobs:
   test:
@@ -52,6 +52,6 @@ jobs:
       with:
         context: .
         tags: |
-          ghcr.io/${{ steps.prep.outputs.repository }}:${{ steps.prep.outputs.version }}
           ghcr.io/${{ steps.prep.outputs.repository }}:latest
+          ghcr.io/${{ steps.prep.outputs.repository }}:${{ steps.prep.outputs.version }}
         push: true

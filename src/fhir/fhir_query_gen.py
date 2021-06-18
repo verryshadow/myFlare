@@ -1,7 +1,7 @@
 import os
 from typing import List
 
-fhir_format = "_format=application/fhir+xml"
+fhir_format = "_format=xml"
 
 
 def generate_fhir_cnf(i2b2_query: List[List[dict]]) -> List[List[str]]:
