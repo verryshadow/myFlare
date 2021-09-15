@@ -53,22 +53,22 @@ def _execute_single_query(paged_query_url: str, init) -> Tuple[Optional[str], Et
     :return: URL to the next page if the response contains one and the response to the given query
     """
 
-    parsed_url = urlparse(paged_query_url)
-
-    new_q = parsed_url._replace(path=parsed_url.path, query='')
-
-    if init:
-        new_q = parsed_url._replace(path=parsed_url.path + "/_search", query='')
-
-    params = dict(parse_qsl(parsed_url.query))
-    headers = {'Accept': 'application/fhir+xml', 'Prefer': 'handling=strict'}
-
     auth = None
 
     if server_user != '':
         auth = (server_user, server_pw)
 
-    response = requests.post(urlunparse(new_q), data=params, verify=False, headers=headers, auth=auth)
+    parsed_url = urlparse(paged_query_url)
+
+    new_q = parsed_url._replace(path=parsed_url.path, query='')
+    headers = {'Accept': 'application/fhir+xml', 'Prefer': 'handling=strict'}
+
+    if init:
+        new_q = parsed_url._replace(path=parsed_url.path + "/_search", query='')
+        params = dict(parse_qsl(parsed_url.query))
+        response = requests.post(urlunparse(new_q), data=params, verify=False, headers=headers, auth=auth)
+    else:
+        response = requests.get(paged_query_url, verify=False, headers=headers, auth=auth)
 
     if response.status_code != 200:
         raise RequestUnsuccessfulError(response, f"failed request on url: {paged_query_url}")
