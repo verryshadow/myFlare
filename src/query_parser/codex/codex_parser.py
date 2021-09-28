@@ -218,7 +218,7 @@ def parse_criterion(json_criterion) -> List[dict]:
         if "fixedCriteria" in mapping:
             fhir_search_criterion += parse_fixed_criteria(mapping['fixedCriteria'])
 
-        fhir_search_criteria = fhir_search_criteria + fhir_search_criterion
+        fhir_search_criteria = fhir_search_criteria + [fhir_search_criterion]
     else:
 
         codes = get_codes_for_code(json_criterion["termCode"]["code"], json_criterion["termCode"]["system"])
@@ -230,6 +230,8 @@ def parse_criterion(json_criterion) -> List[dict]:
                 fhir_search_criterion += parse_fixed_criteria(mapping['fixedCriteria'])
 
             fhir_search_criteria = fhir_search_criteria + [fhir_search_criterion]
+
+    print(fhir_search_criteria)
 
     return fhir_search_criteria
 
