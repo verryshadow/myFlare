@@ -231,8 +231,6 @@ def parse_criterion(json_criterion) -> List[dict]:
 
             fhir_search_criteria = fhir_search_criteria + [fhir_search_criterion]
 
-    print(fhir_search_criteria)
-
     return fhir_search_criteria
 
 
