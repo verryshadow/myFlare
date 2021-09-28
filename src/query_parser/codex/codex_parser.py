@@ -1,4 +1,5 @@
 from typing import List, Optional
+import itertools
 
 from jsonschema import validate
 import json
@@ -30,15 +31,12 @@ def get_hash_from_term_code(term_code):
     return hash(frozenset(hash_val.items()))
 
 
-def flatten_tree(tree: dict, code_string: str):
+def flatten_tree(tree: dict, code_string: list):
     if 'children' in tree:
         for child in tree['children']:
             if 'termCode' in child and child['termCode']['code'] is not None:
 
-                if len(code_string) > 0:
-                    code_string = f'{code_string},'
-
-                code_string = f'{code_string}{child["termCode"]["system"]}|{child["termCode"]["code"]}'
+                code_string = code_string + [f'{child["termCode"]["system"]}|{child["termCode"]["code"]}']
 
             code_string = flatten_tree(child, code_string)
 
@@ -65,15 +63,14 @@ def get_codes_for_code(code, system):
     sub_tree = get_subtree_for_code(ontology, code)
 
     if sub_tree is None:
-        return f'{system}|{code}'
+        return 
 
-    flattened_subtree = flatten_tree(sub_tree, "")
+    flattened_subtree = flatten_tree(sub_tree, [])
 
     if flattened_subtree == '':
-        return f'{system}|{code}'
+        return [f'{system}|{code}']
 
-    return f'{system}|{code},{flattened_subtree}'
-
+    return [f'{system}|{code}'] + flattened_subtree
 
 def validate_codex_json(codex: str) -> None:
     """
@@ -97,7 +94,8 @@ def parse_codex_query_string(codex_json: str) -> List[List[List[dict]]]:
     for src_disjunction in src_inclusion_criteria:
         disjunction = []
         for src_criterion in src_disjunction:
-            disjunction.append(parse_criterion(src_criterion))
+            fhir_search_criteria = parse_criterion(src_criterion)
+            disjunction = disjunction + fhir_search_criteria
         inclusion_criteria.append(disjunction)
     query.append(inclusion_criteria)
 
@@ -109,9 +107,15 @@ def parse_codex_query_string(codex_json: str) -> List[List[List[dict]]]:
     exclusion_criteria = []
     for src_disjunction in src_exclusion_criteria:
         disjunction = []
+        temp_conjunction = []
         for src_criterion in src_disjunction:
-            disjunction.append(parse_criterion(src_criterion))
-        exclusion_criteria.append(disjunction)
+            temp_conjunction.append(parse_criterion(src_criterion))
+
+        criterion_disjunction = itertools.product(*temp_conjunction)
+
+        for criterion_tuple in criterion_disjunction:
+            exclusion_criteria.append(list(criterion_tuple))
+
     query.append(exclusion_criteria)
 
     return query
@@ -187,7 +191,6 @@ class ValueFilterNotFound(Exception):
     def __init__(self, message):
         super.__init__(message)
 
-
 def parse_criterion(json_criterion) -> List[dict]:
     fhir_search_criterion = ""
 
@@ -200,6 +203,8 @@ def parse_criterion(json_criterion) -> List[dict]:
 
     fhir_search_criterion += f'{mapping["fhirResourceType"]}'
 
+    fhir_search_criteria = []
+
     if "valueFilter" in json_criterion:
 
         if "termCodeSearchParameter" in mapping:
@@ -209,14 +214,24 @@ def parse_criterion(json_criterion) -> List[dict]:
         else:
             fhir_search_criterion += parse_value_filter(
                 json_criterion['valueFilter'], mapping['valueSearchParameter'], True)
+
+        if "fixedCriteria" in mapping:
+            fhir_search_criterion += parse_fixed_criteria(mapping['fixedCriteria'])
+
+        fhir_search_criteria = fhir_search_criteria + fhir_search_criterion
     else:
-        fhir_search_criterion += f'?{mapping["termCodeSearchParameter"]}' + \
-                                 f'={get_codes_for_code(json_criterion["termCode"]["code"], json_criterion["termCode"]["system"])}'
 
-    if "fixedCriteria" in mapping:
-        fhir_search_criterion += parse_fixed_criteria(mapping['fixedCriteria'])
+        codes = get_codes_for_code(json_criterion["termCode"]["code"], json_criterion["termCode"]["system"])
 
-    return fhir_search_criterion
+        for code in codes:
+            fhir_search_criterion = f'{mapping["fhirResourceType"]}?{mapping["termCodeSearchParameter"]}' + \
+                                    f'={code}'
+            if "fixedCriteria" in mapping:
+                fhir_search_criterion += parse_fixed_criteria(mapping['fixedCriteria'])
+
+            fhir_search_criteria = fhir_search_criteria + [fhir_search_criterion]
+
+    return fhir_search_criteria
 
 
 def remove_empty_elements(d):
