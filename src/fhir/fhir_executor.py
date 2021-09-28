@@ -66,9 +66,9 @@ def _execute_single_query(paged_query_url: str, init) -> Tuple[Optional[str], Et
     if init:
         new_q = parsed_url._replace(path=parsed_url.path + "/_search", query='')
         params = dict(parse_qsl(parsed_url.query))
-        response = requests.post(urlunparse(new_q), data=params, verify=False, headers=headers, auth=auth)
+        response = requests.post(urlunparse(new_q), data=params, headers=headers, auth=auth)
     else:
-        response = requests.get(paged_query_url, verify=False, headers=headers, auth=auth)
+        response = requests.get(paged_query_url, headers=headers, auth=auth)
 
     if response.status_code != 200:
         raise RequestUnsuccessfulError(response, f"failed request on url: {paged_query_url}")
