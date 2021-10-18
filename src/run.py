@@ -87,7 +87,7 @@ def run_codex_query(instruction: Instruction) -> str:
     parsed_input = parse_input(instruction)
 
     # inclusion criteria
-    fhir_cnf_responses = set()
+    fhir_cnf_responses = None
 
     for fhir_disjunction in parsed_input[0]:
         fhir_disjunction_res = set()
@@ -99,7 +99,7 @@ def run_codex_query(instruction: Instruction) -> str:
                 pat_ids = get_patient_ids_from_bundle(fhir_response)
                 fhir_disjunction_res = fhir_disjunction_res.union(pat_ids)
 
-        if len(fhir_cnf_responses) == 0:
+        if fhir_cnf_responses == None:
             fhir_cnf_responses = fhir_disjunction_res
         else:
             fhir_cnf_responses = fhir_cnf_responses.intersection(
@@ -108,7 +108,7 @@ def run_codex_query(instruction: Instruction) -> str:
     # exclusion criteria
     fhir_dnf_responses = set()
     for fhir_conjunction in parsed_input[1]:
-        fhir_conjunction_res = set()
+        fhir_conjunction_res = None
         for query in fhir_conjunction:
             if query == "":
                 continue
@@ -120,7 +120,7 @@ def run_codex_query(instruction: Instruction) -> str:
                 pat_ids = pat_ids.union(
                     get_patient_ids_from_bundle(fhir_response))
 
-            if len(fhir_conjunction_res) == 0:
+            if fhir_conjunction_res == None:
                 fhir_conjunction_res = pat_ids
             else:
                 fhir_conjunction_res = fhir_conjunction_res.intersection(
