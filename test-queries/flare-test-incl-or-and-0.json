@@ -1,0 +1,52 @@
+{
+  "version": "http://to_be_decided.com/draft-1/schema#",
+  "display": "",
+  "inclusionCriteria": [
+    [
+      {
+        "termCode": {
+          "code": "27113001",
+          "system": "http://snomed.info/sct",
+          "version": "v1",
+          "display": "Body Weight"
+        },
+        "valueFilter": {
+          "type": "quantity-comparator",
+          "unit": {
+            "code": "kg",
+            "display": "kilogram"
+          },
+          "comparator": "gt",
+          "value": 200
+        }
+      },
+      {
+        "termCode": {
+          "code": "718-7",
+          "system": "http://loinc.org",
+          "version": "v1",
+          "display": "Hemoglobin"
+        },
+        "valueFilter": {
+          "type": "quantity-comparator",
+          "unit": {
+            "code": "g/dL",
+            "display": "g/dL"
+          },
+          "comparator": "gt",
+          "value": 10
+        }
+      }
+    ],
+    [
+      {
+        "termCode": {
+          "code": "M06.99",
+          "system": "http://fhir.de/CodeSystem/dimdi/icd-10-gm",
+          "version": "v1",
+          "display": "rheuma"
+        }
+      }
+    ]
+  ]
+}
