@@ -1,0 +1,54 @@
+{
+  "version": "http://to_be_decided.com/draft-1/schema#",
+  "display": "",
+  "inclusionCriteria": [
+    [
+      {
+        "termCode": {
+          "code": "27113001",
+          "system": "http://snomed.info/sct",
+          "version": "v1",
+          "display": "Body Weight"
+        },
+        "valueFilter": {
+          "type": "quantity-comparator",
+          "unit": {
+            "code": "kg",
+            "display": "kilogram"
+          },
+          "comparator": "gt",
+          "value": 100
+        }
+      }
+    ]
+  ],
+  "exclusionCriteria": [
+    [
+      {
+        "termCode": {
+          "code": "M06.99",
+          "system": "http://fhir.de/CodeSystem/dimdi/icd-10-gm",
+          "version": "v1",
+          "display": "rheuma"
+        }
+      },
+      {
+        "termCode": {
+          "code": "27113001",
+          "system": "http://snomed.info/sct",
+          "version": "v1",
+          "display": "Body Weight"
+        },
+        "valueFilter": {
+          "type": "quantity-comparator",
+          "unit": {
+            "code": "kg",
+            "display": "kilogram"
+          },
+          "comparator": "lt",
+          "value": 150
+        }
+      }
+    ]
+  ]
+}
