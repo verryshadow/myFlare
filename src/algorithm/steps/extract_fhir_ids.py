@@ -1,5 +1,5 @@
 from algorithm import AlgorithmStep
-from fhir import get_patient_ids_from_bundle
+from myfhir import get_patient_ids_from_bundle
 from worker.communication import Instruction
 from worker.communication.instruction import ExecutionState
 from worker.communication.logging_callback import LoggingCallback, default_logger

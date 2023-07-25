@@ -25,7 +25,7 @@
 
 ### script
 ```json
-curl --location --request POST 'http://localhost:5000/query-translate' \
+curl --location --request POST 'http://localhost:5111/query-translate' \
 --header 'Content-Type: codex/json' \
 --header 'Accept: internal/json' \
 --data-raw '{
@@ -60,7 +60,7 @@ curl --location --request POST 'http://localhost:5000/query-translate' \
 ### script
 
 ```json
-curl --location --request POST 'http://localhost:5000/query-translate' \
+curl --location --request POST 'http://localhost:5111/query-translate' \
 --header 'Content-Type: codex/json' \
 --header 'Accept: internal/json' \
 --data-raw '{

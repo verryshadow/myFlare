@@ -2,26 +2,11 @@ version: "3.7"
 
 services:
 
-  flare:
-    ports:
-      - ${PORT_FLARE:-127.0.0.1:5000}:5000
-    environment:
-      FHIR_BASE_URL: ${FHIR_BASE_URL:-http://fhir-server:8080/fhir}
-      DEBUG: ${FLARE_DEBUG:---debug}
-      FHIR_USER: ${FHIR_USER:-}
-      FHIR_PW: ${FHIR_PW:-}
-    build: .
-    restart: always
-    volumes:
-      - ./src:/opt/flare/src
-      - ${CODEX_CONCEPT_TREE_PATH:-./src/query_parser/codex/codex-code-tree.json}:/opt/flare/src/query_parser/codex/codex-code-tree.json
-      - ${CODEX_TERM_CODE_MAPPING_PATH:-./src/query_parser/codex/codex-term-code-mapping.json}:/opt/flare/src/query_parser/codex/codex-term-code-mapping.json
-
   fhir-server:
-    container_name: fhir-server
+    container_name: myFhir-server
     image: "ghcr.io/num-codex/blaze:0.1.0"
     environment:
-      BASE_URL: "http://fhir-server:8080"
+      BASE_URL: "http://localhost:8081"
       JAVA_TOOL_OPTIONS: "-Xmx4g"
       LOG_LEVEL: debug
     ports:
@@ -29,12 +14,15 @@ services:
     volumes:
     - "blaze-data:/app/data"
 
-  db:
-    image: postgres:12.6-alpine
-    restart: always
+  fhir-server2:
+    container_name: myFhir-server2
+    image: "ghcr.io/num-codex/blaze:0.1.0"
     environment:
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: fhir
+      BASE_URL: "http://localhost:8082"
+      JAVA_TOOL_OPTIONS: "-Xmx4g"
+      LOG_LEVEL: debug
+    ports:
+    - ${PORT_BLAZE_FHIR:-127.0.0.1:8082}:8080
 
 volumes:
   blaze-data:

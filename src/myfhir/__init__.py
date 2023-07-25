@@ -1,3 +1,3 @@
-from fhir.fhir_executor import execute_fhir_query
-from fhir.fhir_parser import build_result_set_from_query_results, get_patient_ids_from_bundle
-from fhir.fhir_query_gen import generate_fhir_cnf
+from myfhir.fhir_executor import execute_fhir_query
+from myfhir.fhir_parser import build_result_set_from_query_results, get_patient_ids_from_bundle
+from myfhir.fhir_query_gen import generate_fhir_cnf

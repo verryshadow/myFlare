@@ -1,4 +1,4 @@
-curl --location --request POST 'http://localhost:5000/query-translate' \
+curl --location --request POST 'http://localhost:5111/query-translate' \
 --header 'Content-Type: codex/json' \
 --header 'Accept: internal/json' \
 --data-raw '{
@@ -15,9 +15,9 @@ curl --location --request POST 'http://localhost:5000/query-translate' \
           "type": "concept",
           "selectedConcepts": [
             {
-              "code": "female",
+              "code": "male",
               "system": "http://hl7.org/fhir/administrative-gender",
-              "display": "Female"
+              "display": "Male"
             }
           ]
         }

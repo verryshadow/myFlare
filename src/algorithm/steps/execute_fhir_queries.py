@@ -1,7 +1,7 @@
 import time
 
 from algorithm import AlgorithmStep
-from fhir import execute_fhir_query
+from myfhir import execute_fhir_query
 from worker.communication import Instruction, ProcessingEvent
 from worker.communication.instruction import ExecutionState
 from worker.communication.logging_callback import LoggingCallback, default_logger

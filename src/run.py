@@ -10,8 +10,8 @@ from configuration.process_configuration import response_algo_steps_map
 from worker.communication import Instruction
 from worker.communication.instruction import ExecutionState
 from worker.communication.logging_callback import default_logger
-from fhir import execute_fhir_query
-from fhir import get_patient_ids_from_bundle
+from myfhir import execute_fhir_query
+from myfhir import get_patient_ids_from_bundle
 
 
 __debug = True
@@ -70,7 +70,7 @@ def parse_input(instruction: Instruction) -> List[List[List[dict]]]:
     return intermediate_query_repr
 
 def run_translate_query(instruction: Instruction) -> str:
-    logger = default_logger 
+    logger = default_logger
     parsed_input = parse_input(instruction)
 
     return json.dumps(parsed_input)

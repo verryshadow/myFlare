@@ -1,8 +1,8 @@
 #!/bin/bash
 
-docker-compose -f docker-compose-odm.yml up
+#docker-compose -f docker-compose-odm.yml up
 
-FILES=./testdata/*
+FILES=./testdata3/*.json
 for fhirBundle in $FILES
 do
   echo "Sending Testdate bundle $fhirBundle ..."

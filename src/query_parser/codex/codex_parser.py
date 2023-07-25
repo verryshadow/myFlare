@@ -23,10 +23,16 @@ def load_codex_mapping():
 
 
 def get_hash_from_term_code(term_code):
-    hash_val = {
-        'code': term_code['code'],
-        'system': term_code['system'],
-    }
+    if 'code' in term_code:
+        hash_val = {
+            'code': term_code['code'],
+            'system': term_code['system'],
+        }
+    else:
+        hash_val = {
+            'code': term_code[0]['code'],
+            'system': term_code[0]['system'],
+        }
 
     return hash(frozenset(hash_val.items()))
 
@@ -34,9 +40,9 @@ def get_hash_from_term_code(term_code):
 def flatten_tree(tree: dict, code_string: list):
     if 'children' in tree:
         for child in tree['children']:
-            if 'termCode' in child and child['termCode']['code'] is not None:
+            if 'termCodes' in child and child['termCodes']['code'] is not None:
 
-                code_string = code_string + [f'{child["termCode"]["system"]}|{child["termCode"]["code"]}']
+                code_string = code_string + [f'{child["termCodes"]["system"]}|{child["termCodes"]["code"]}']
 
             code_string = flatten_tree(child, code_string)
 
@@ -49,8 +55,8 @@ def get_subtree_for_code(tree: dict, search_string: str):
     if 'children' in tree:
 
         for child in tree['children']:
-            if 'termCode' in child:
-                if search_string == child['termCode']['code']:
+            if 'termCodes' in child:
+                if search_string == child['termCodes']['code']:
                     return child
 
             if found_tree is None:
@@ -193,22 +199,21 @@ class ValueFilterNotFound(Exception):
 
 def parse_criterion(json_criterion) -> List[dict]:
     fhir_search_criterion = ""
-
-    if not get_hash_from_term_code(json_criterion["termCode"]) in codex_mapping:
-        print("mapping missing for termCode:", json_criterion["termCode"])
+    if not get_hash_from_term_code(json_criterion["termCodes"]) in codex_mapping:
+        print("mapping missing for termCodes:", json_criterion["termCodes"])
         return fhir_search_criterion
 
     mapping = codex_mapping[get_hash_from_term_code(
-        json_criterion["termCode"])]
+        json_criterion["termCodes"])]
 
     fhir_search_criterion += f'{mapping["fhirResourceType"]}'
 
     fhir_search_criteria = []
 
     if "valueFilter" in json_criterion:
-
         if "termCodeSearchParameter" in mapping:
-            fhir_search_criterion += f'?{mapping["termCodeSearchParameter"]}={json_criterion["termCode"]["system"]}|{json_criterion["termCode"]["code"]}'
+            # es wird immer das Element der Stelle 0 hergenommen, da es sich immer um 1 Array mit 1 Dictionary handelt. Das gilt sowohl für code, als auch für system
+            fhir_search_criterion += f'?{mapping["termCodeSearchParameter"]}={json_criterion["termCodes"][0]["system"]}|{json_criterion["termCodes"][0]["code"]}'
             fhir_search_criterion += parse_value_filter(
                 json_criterion['valueFilter'], mapping['valueSearchParameter'], False)
         else:
@@ -220,9 +225,7 @@ def parse_criterion(json_criterion) -> List[dict]:
 
         fhir_search_criteria = fhir_search_criteria + [fhir_search_criterion]
     else:
-
-        codes = get_codes_for_code(json_criterion["termCode"]["code"], json_criterion["termCode"]["system"])
-
+        codes = [json_criterion["termCodes"][0].get("system")]
         for code in codes:
             fhir_search_criterion = f'{mapping["fhirResourceType"]}?{mapping["termCodeSearchParameter"]}' + \
                                     f'={code}'

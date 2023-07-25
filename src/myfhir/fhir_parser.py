@@ -1,7 +1,7 @@
 import xml.etree.ElementTree as Etree
 from typing import List, Set
 
-from fhir.namespace import ns
+from myfhir.namespace import ns
 
 
 def get_patient_ids_from_bundle(bundle: Etree.Element) -> Set[str]:

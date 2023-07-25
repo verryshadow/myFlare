@@ -18,7 +18,7 @@ docker-compose up -d
 
 after starting the FLARE instance you can test if it is up with
 ```bash
-curl -vX POST --data @src/query_parser/i2b2/i2b2_gecco_demo.xml -H "Content-type: i2b2/xml" -H "Accept: internal/xml" http://localhost:5000/query
+curl -vX POST --data @src/query_parser/i2b2/i2b2_gecco_demo.xml -H "Content-type: i2b2/xml" -H "Accept: internal/xml" http://localhost:5111/query
 ```
 this command submits a test query to the server, and renders the response with their headers:
 ```
@@ -90,7 +90,7 @@ On success, the query response contains a code 202, and a Location header linkin
 
 ####Query
 ```bash
-curl -vX POST --data @src/query_parser/i2b2/i2b2_gecco_demo.xml -H "Content-type: i2b2/xml" -H "Accept: internal/xml" http://localhost:5000/query
+curl -vX POST --data @src/query_parser/i2b2/i2b2_gecco_demo.xml -H "Content-type: i2b2/xml" -H "Accept: internal/xml" http://localhost:5111/query
 ```
 
 ####Response
@@ -221,14 +221,20 @@ curl http://localhost:5000/query/ea6cd7ff-fbb4-4824-9147-81681b9f73e2/results
 
 ```bash
 pip install -r requirements.txt
-
+ 
 FHIR_BASE_URL=http://localhost:5555/fhir python src/run_server.py
 
 ```
 
 When the server is running, you can run queries:
 ```bash
-curl -vX POST --data @src/query_parser/i2b2/i2b2_demo.xml -H "Content-type: i2b2/xml" -H "Accept: internal/xml" http://localhost:5000/query
+curl -vX POST --data @src/query_parser/i2b2/i2b2_demo.xml -H "Content-type: i2b2/xml" -H "Accept: internal/xml" http://localhost:5111/query
 ```
 which will return with the relative location to the request status in the location header
 
+Verena's add:
+
+I have no clue what this is doing, but here we go:
+```bash
+curl -X POST --data @src/query_parser/i2b2/i2b2_demo.xml -H "Content-Type: application/xml" http://localhost:5111/i2b2
+```

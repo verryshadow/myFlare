@@ -9,8 +9,8 @@ from urllib.parse import urlparse
 from urllib.parse import urlunparse
 from urllib.parse import parse_qsl
 
-from fhir.fhir_query_gen import fhir_format
-from fhir.namespace import ns
+from myfhir.fhir_query_gen import fhir_format
+from myfhir.namespace import ns
 
 from urllib.parse import urlparse
 
@@ -24,19 +24,15 @@ def change_server_base_url(server_num):
     server_dict = {
         "1": "http://localhost:8081/fhir",
         "2": "http://localhost:8082/fhir",
-        "3": "http://localhost:8083/fhir"
+        "3": "http://localhost:8083/fhir"#
     }
     global server_base_url
     server_base_url = server_dict[server_num]
-    print(server_base_url)
     return None
 
 def get_server_base_url():
-    print(server_base_url)
     return server_base_url
 
-# TODO: Create parallel requests with user config.
-#  Check whether this may slow down the process due to FHIR-server performance beforehand
 def execute_fhir_query(query: str) -> List[Etree.Element]:
     """
     Executes a FHIR query, fetches all pages
@@ -45,6 +41,14 @@ def execute_fhir_query(query: str) -> List[Etree.Element]:
     :return: List of FHIR-bundles in xml format returned by the FHIR server
     """
     ret = []
+    print("777777777777777777777777777777777777777777777")
+    print("777777777777777777777777777777777777777777777")
+    print("777777777777777777777777777777777777777777777")
+    print("777777777777777777777777777777777777777777777")
+    print(query)
+    print("777777777777777777777777777777777777777777777")
+    print("777777777777777777777777777777777777777777777")
+    print("777777777777777777777777777777777777777777777")
     print(server_base_url)
     next_query = f'{server_base_url}/{query}'
     init = True
@@ -55,10 +59,6 @@ def execute_fhir_query(query: str) -> List[Etree.Element]:
         # persist_query_response(x_response)
         ret.append(x_response)
         init = False
-        # TODO die unteren 3 Zeilen löschen, ansonsten glaubt man, dass die Patienten von dem gleichen Server kommen, obwohl eigentlich der 2. Server abgefragt wird.
-        # next_query = f'{"http://localhost:8082/fhir"}/{query}'
-        # next_query, x_response = _execute_single_query(next_query.replace(" ", ""), init)
-        # ret.append(x_response)
 
     return ret
 
@@ -83,26 +83,20 @@ def _execute_single_query(paged_query_url: str, init) -> Tuple[Optional[str], Et
     headers = {'Accept': 'application/fhir+xml', 'Prefer': 'handling=strict'}
 
     if init:
+        print("55555555555555555555555555555555555555")
+        print("55555555555555555555555555555555555555")
+        print("55555555555555555555555555555555555555")
+        print(paged_query_url)
+        print("55555555555555555555555555555555555555")
+        print(new_q)
+        print("55555555555555555555555555555555555555")
+        print(parsed_url)
+        print("55555555555555555555555555555555555555")
+        print("55555555555555555555555555555555555555")
+        print("55555555555555555555555555555555555555")
         new_q = parsed_url._replace(path=parsed_url.path + "/_search", query='')
         params = dict(parse_qsl(parsed_url.query))
-        print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
-        print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
-        print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
-        print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
-        print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
-        print(new_q)
-        print(urlunparse(new_q))
-        print(params)
-        print(headers)
-        print(auth)
-        print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
-        print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
-        print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
-        print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
-        print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
         response = requests.post(urlunparse(new_q), data=params, headers=headers, auth=auth)
-        print(response)
-        print("the end")
     else:
         response = requests.get(paged_query_url, headers=headers, auth=auth)
 

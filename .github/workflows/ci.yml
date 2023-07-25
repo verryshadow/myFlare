@@ -24,7 +24,7 @@ jobs:
       run: docker-compose up -d
 
     - name: Test Query Endpoint
-      run: docker run --network container:codex-flare_flare_1 -v $(pwd)/src/query_parser/i2b2:/i2b2 appropriate/curl -vX POST --data @/i2b2/i2b2_gecco_demo.xml -H "Content-type:i2b2/xml" -H "Accept:internal/xml" http://localhost:5000/query
+      run: docker run --network container:codex-flare_flare_1 -v $(pwd)/src/query_parser/i2b2:/i2b2 appropriate/curl -vX POST --data @/i2b2/i2b2_gecco_demo.xml -H "Content-type:i2b2/xml" -H "Accept:internal/xml" http://localhost:5111/query
 
   build:
     if: ${{ startsWith(github.ref, 'refs/tags/v') }}

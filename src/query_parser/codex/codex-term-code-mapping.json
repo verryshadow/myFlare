@@ -51979,8 +51979,8 @@
                 "type": "code",
                 "value": [
                     {
-                        "code": "completed",
-                        "display": "completed",
+                        "code": "Plateletpheresis",
+                        "display": "Plateletpheresis",
                         "system": "http://hl7.org/fhir/event-status"
                     },
                     {
@@ -51996,7 +51996,9 @@
             "display": "Apheresis (procedure)",
             "system": "http://snomed.info/sct"
         },
-        "termCodeSearchParameter": "code"
+        "termCodeSearchParameter": "code",
+        "valueFhirPath": "valueConcept",
+        "valueSearchParameter": "value-concept"
     },
     {
         "fhirResourceType": "Condition",
@@ -69398,7 +69400,7 @@
                 "type": "code",
                 "value": [
                     {
-                        "code": "available",
+                        "code": "active",
                         "display": "Available",
                         "system": "http://hl7.org/fhir/ValueSet/specimen-status"
                     }
@@ -69410,7 +69412,9 @@
             "display": "Saliva specimen (specimen)",
             "system": "http://snomed.info/sct"
         },
-        "termCodeSearchParameter": "type"
+        "termCodeSearchParameter": "type",
+        "valueFhirPath": "valueConcept",
+        "valueSearchParameter": "value-concept"
     },
     {
         "fhirResourceType": "Condition",

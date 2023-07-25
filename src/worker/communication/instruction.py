@@ -128,8 +128,7 @@ Decodes JSON into Instructions
 
 def get_request_file_path(request_id: str):
     base_path = os.environ.get('PERSISTENCE') or "./worker/requests"
-    pathlib.Path(base_path).mkdir(parents=True, exist_ok=True)
-
+    pathlib.Path(base_path).mkdir(0o755, parents=True, exist_ok=True)
     return f"{base_path}/{request_id}.json"
 
 

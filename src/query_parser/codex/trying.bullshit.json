@@ -1,0 +1,47 @@
+{
+  "version": "http://to_be_decided.com/draft-1/schema#",
+  "inclusionCriteria": [
+    [
+      {
+        "termCodes": [
+          {
+            "code": "424144002",
+            "system": "http://snomed.info/sct",
+            "display": "Current chronological age (observable entity)"
+          }
+        ],
+        "valueFilter": {
+          "type": "quantity-range",
+          "selectedConcept s": [],
+          "unit": {
+            "code": "year",
+            "display": "year"
+          },
+          "minValue": 0.0,
+          "maxValue": 100.0
+        }
+      }
+    ],
+    [
+      {
+        "termCodes": [
+          {
+            "code": "82810-3",
+            "system": "http://loinc.org",
+            "display": "Pregnancy status"
+          }
+        ],
+        "valueFilter": {
+          "type": "concept",
+          "selectedConcepts": [
+            {
+              "code": "LA15173-0",
+              "system": "http://loinc.org",
+              "display": "Pregnant"
+            }
+          ]
+        }
+      }
+    ]
+  ]
+}
