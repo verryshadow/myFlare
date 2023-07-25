@@ -20,6 +20,21 @@ server_user = os.environ.get("FHIR_USER") or ""
 server_pw = os.environ.get("FHIR_PW") or ""
 
 
+def change_server_base_url(server_num):
+    server_dict = {
+        "1": "http://localhost:8081/fhir",
+        "2": "http://localhost:8082/fhir",
+        "3": "http://localhost:8083/fhir"
+    }
+    global server_base_url
+    server_base_url = server_dict[server_num]
+    print(server_base_url)
+    return None
+
+def get_server_base_url():
+    print(server_base_url)
+    return server_base_url
+
 # TODO: Create parallel requests with user config.
 #  Check whether this may slow down the process due to FHIR-server performance beforehand
 def execute_fhir_query(query: str) -> List[Etree.Element]:
@@ -30,16 +45,20 @@ def execute_fhir_query(query: str) -> List[Etree.Element]:
     :return: List of FHIR-bundles in xml format returned by the FHIR server
     """
     ret = []
-
+    print(server_base_url)
     next_query = f'{server_base_url}/{query}'
     init = True
 
     # Execute queries as long as there is a next page
     while next_query is not None:
-        next_query, x_response = _execute_single_query(next_query, init)
+        next_query, x_response = _execute_single_query(next_query.replace(" ", ""), init)
         # persist_query_response(x_response)
         ret.append(x_response)
         init = False
+        # TODO die unteren 3 Zeilen löschen, ansonsten glaubt man, dass die Patienten von dem gleichen Server kommen, obwohl eigentlich der 2. Server abgefragt wird.
+        # next_query = f'{"http://localhost:8082/fhir"}/{query}'
+        # next_query, x_response = _execute_single_query(next_query.replace(" ", ""), init)
+        # ret.append(x_response)
 
     return ret
 
@@ -66,7 +85,24 @@ def _execute_single_query(paged_query_url: str, init) -> Tuple[Optional[str], Et
     if init:
         new_q = parsed_url._replace(path=parsed_url.path + "/_search", query='')
         params = dict(parse_qsl(parsed_url.query))
+        print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+        print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+        print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+        print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+        print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+        print(new_q)
+        print(urlunparse(new_q))
+        print(params)
+        print(headers)
+        print(auth)
+        print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+        print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+        print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+        print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+        print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
         response = requests.post(urlunparse(new_q), data=params, headers=headers, auth=auth)
+        print(response)
+        print("the end")
     else:
         response = requests.get(paged_query_url, headers=headers, auth=auth)
 
