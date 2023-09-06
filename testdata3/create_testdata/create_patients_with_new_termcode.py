@@ -1,7 +1,7 @@
 # #########################################################################################
 #
 # Creates random patients data with age, birthdate, therapy, gender, ethnics, pregnant
-#   + adds a new termcode called "Tobacco Use Status" for testing reasons
+#   + adds a new termcode called "Tobacco Use Status" & "warfarin-dose" for testing reasons
 # all patients are ether not pregnant or the pregnancy status is unknown
 #
 # #########################################################################################
@@ -272,9 +272,6 @@ for i in range(20):
                 },
                 "subject": {
                     "reference": "Patient/" + random_hex
-                },
-                "encounter": {
-                    "reference": "Encounter/68b157940b50eb031e94379dbbc96f0c"
                 },
                 "_effectiveDateTime": {
                     "extension": [{
