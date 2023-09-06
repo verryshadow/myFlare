@@ -1,12 +1,10 @@
 __pycache__/
 /.idea
-/src/worker/requests/*
 /.idea/*
 src/worker/requests/
 virtenv/Include/
 virtenv/**
-FHIR/fhir_responses/
 testdata/*
 !testdata/test-all.json
-ontology
-test.py
+testdata3/*
+!testdata3/create_testdata

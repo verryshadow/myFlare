@@ -24,7 +24,7 @@ def change_server_base_url(server_num):
     server_dict = {
         "1": "http://localhost:8081/fhir",
         "2": "http://localhost:8082/fhir",
-        "3": "http://localhost:8083/fhir"#
+        "3": "http://localhost:8083/fhir"
     }
     global server_base_url
     server_base_url = server_dict[server_num]
@@ -41,15 +41,7 @@ def execute_fhir_query(query: str) -> List[Etree.Element]:
     :return: List of FHIR-bundles in xml format returned by the FHIR server
     """
     ret = []
-    print("777777777777777777777777777777777777777777777")
-    print("777777777777777777777777777777777777777777777")
-    print("777777777777777777777777777777777777777777777")
-    print("777777777777777777777777777777777777777777777")
-    print(query)
-    print("777777777777777777777777777777777777777777777")
-    print("777777777777777777777777777777777777777777777")
-    print("777777777777777777777777777777777777777777777")
-    print(server_base_url)
+    print("Current Server: " + server_base_url)
     next_query = f'{server_base_url}/{query}'
     init = True
 
@@ -83,19 +75,8 @@ def _execute_single_query(paged_query_url: str, init) -> Tuple[Optional[str], Et
     headers = {'Accept': 'application/fhir+xml', 'Prefer': 'handling=strict'}
 
     if init:
-        print("55555555555555555555555555555555555555")
-        print("55555555555555555555555555555555555555")
-        print("55555555555555555555555555555555555555")
-        print(paged_query_url)
-        print("55555555555555555555555555555555555555")
-        print(new_q)
-        print("55555555555555555555555555555555555555")
-        print(parsed_url)
-        print("55555555555555555555555555555555555555")
-        print("55555555555555555555555555555555555555")
-        print("55555555555555555555555555555555555555")
         new_q = parsed_url._replace(path=parsed_url.path + "/_search", query='')
-        params = dict(parse_qsl(parsed_url.query))
+        params = parse_qsl(parsed_url.query)
         response = requests.post(urlunparse(new_q), data=params, headers=headers, auth=auth)
     else:
         response = requests.get(paged_query_url, headers=headers, auth=auth)

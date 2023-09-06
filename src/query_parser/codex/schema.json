@@ -24,7 +24,7 @@
 				"display"
 			]
 		},
-		"myyyy": {
+		"myTermcode": {
 			"type": "object",
 			"description": "The mytermCode defines a concept based on a coding system (i.e. LOINC). The triplet of code, system and version identify the concept.",
 			"properties": {
@@ -110,7 +110,7 @@
 								"type": "array",
 								"minItems": 1,
 								"items": {
-									"$ref": "#/definitions/myyyy"
+									"$ref": "#/definitions/myTermcode"
 								}
 							}
 						},

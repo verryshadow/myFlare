@@ -166,7 +166,7 @@ def create_query_sync():
     # Respond with location header
     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-    print(response)
+    print("Result: " + response)
     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     return response
@@ -345,7 +345,7 @@ def accept_to_response_type(accept: str) -> ResponseType:
     """
     # Get first part of media-type in uppercase, split of charset, boundary and
     accept = accept.split(";")[0].split("/")[0].upper()
-    # TODO not the right accept is sent from the Java Backend to the Flare. I tried to change it, but it was somehow automaticly overwritte....
+    # TODO not the right accept is sent from the Java Backend to the Flare. I tried to change it, but it was somehow automaticly overwritte.... afaik: has to be changed in myBackend
     if accept != "INTERNAL" and accept != "RESULT":
         accept = "RESULT"
     return ResponseType[accept]
