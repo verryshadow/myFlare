@@ -330,9 +330,6 @@ def content_type_to_query_syntax(content_type: str) -> QuerySyntax:
     """
     # Get first part of media-type in uppercase, split of charset, boundary and
     content_type = content_type.split(";")[0].split("/")[0].upper()
-    # TODO not the right accept is sent from the Java Backend to the Flare. I tried to change it, but it was somehow automaticly overwritte....
-    if content_type != "CODEX" and content_type != "I2B2" and content_type != "INTERNAL":
-        content_type = "CODEX"
     return QuerySyntax[content_type]
 
 
@@ -345,9 +342,6 @@ def accept_to_response_type(accept: str) -> ResponseType:
     """
     # Get first part of media-type in uppercase, split of charset, boundary and
     accept = accept.split(";")[0].split("/")[0].upper()
-    # TODO not the right accept is sent from the Java Backend to the Flare. I tried to change it, but it was somehow automaticly overwritte.... afaik: has to be changed in myBackend
-    if accept != "INTERNAL" and accept != "RESULT":
-        accept = "RESULT"
     return ResponseType[accept]
 
 
