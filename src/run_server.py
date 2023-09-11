@@ -115,6 +115,7 @@ def create_query():
     response.headers["Location"] = f"/query/{str(instruction.request_id)}"
     return response
 
+
 @app.route("/query-translate", methods=["POST"])
 def create_query_translate():
     """
@@ -140,6 +141,7 @@ def create_query_translate():
     response: str = run_translate_query(instruction)
     # Respond with location header
     return response
+
 
 @app.route("/query-sync", methods=["POST"])
 def create_query_sync():
@@ -171,6 +173,7 @@ def create_query_sync():
     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     return response
 
+
 def get_query_from_persistence(query_id: str) -> Optional[Instruction]:
     """
     Fetches a persisted query
@@ -201,6 +204,7 @@ def handle_query_state(query_id: str):
 
     return query.state.name
 
+
 @app.route("/change_server_base_url/<num>", methods=["GET"])
 def change_base_url(num: int):
     change_server_base_url(num)
@@ -209,6 +213,7 @@ def change_base_url(num: int):
         'body': json.dumps(f'The change worked, now it is Server {num}')
     }
 
+
 @app.route("/get_server_base_url", methods=["GET"])
 def server_base_url():
     curr_base_url = get_server_base_url()
@@ -216,7 +221,6 @@ def server_base_url():
         'statusCode': 200,
         'body': json.dumps(f'Now it is Server {curr_base_url}')
     }
-
 
 
 @app.route("/query/<query_id>/results", methods=["GET"])
@@ -253,7 +257,7 @@ def get_query(query_id: str):
 
 
 @app.route("/query", methods=["GET"])
-def list_queries():    
+def list_queries():
     return "Not Implemented", 501
 
 
@@ -363,7 +367,7 @@ if __name__ == '__main__':
         refill_queue()
 
     # Start application
-#    worker_thread.start()
-#    event_distributor_thread.start()
+    #    worker_thread.start()
+    #    event_distributor_thread.start()
 
     app.run(host=args.host, port=args.port, threaded=True, debug=args.debug)

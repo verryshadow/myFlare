@@ -5,11 +5,9 @@ import requests
 import urllib3
 import os
 from requests import Response
-from urllib.parse import urlparse
 from urllib.parse import urlunparse
 from urllib.parse import parse_qsl
 
-from myfhir.fhir_query_gen import fhir_format
 from myfhir.namespace import ns
 
 from urllib.parse import urlparse
