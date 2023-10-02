@@ -18,6 +18,7 @@ server_user = os.environ.get("FHIR_USER") or ""
 server_pw = os.environ.get("FHIR_PW") or ""
 
 
+# add new fhir server here
 def change_server_base_url(server_num):
     server_dict = {
         "1": "http://localhost:8081/fhir",
@@ -45,6 +46,7 @@ def execute_fhir_query(query: str) -> List[Etree.Element]:
 
     # Execute queries as long as there is a next page
     while next_query is not None:
+        print("This is the query that is sent to the fhir server: " + next_query)
         next_query, x_response = _execute_single_query(next_query.replace(" ", ""), init)
         # persist_query_response(x_response)
         ret.append(x_response)

@@ -42,44 +42,44 @@ def build_response(result_set):
     return x_result_set
 
 
-@DeprecationWarning
-@app.route("/i2b2", methods=["POST"])
-def handle_i2b2_query():
-    """
-    Synchronous execution API (legacy)
-
-    takes an I2B2 Query Definition in the body and executes it.
-    :return: the number of matching patients found
-    """
-    print("handling query")
-    # Execute and timestamp
-    start_time = time.time()
-    i2b2_request = request.data.decode("UTF-8")
-    try:
-        result_set = run(Instruction(i2b2_request, str(uuid4()), time.time_ns()))
-        response = build_response(result_set)
-    except RequestException:
-        return "Connection error with upstream FHIR server", 504
-
-    end_time = time.time()
-    delta = end_time - start_time
-
-    # Insert timestamps into result_set
-    x_start_time = Etree.Element("start_time")
-    x_start_time.attrib["value"] = str(start_time)
-
-    x_end_time = Etree.Element("end_time")
-    x_end_time.attrib["value"] = str(end_time)
-
-    x_delta = Etree.Element("delta")
-    x_delta.attrib["value"] = str(delta)
-
-    response.insert(0, x_end_time)
-    response.insert(0, x_start_time)
-    response.insert(0, x_delta)
-    response = Etree.tostring(response).decode("UTF-8")
-
-    return str(response)
+# @DeprecationWarning
+# @app.route("/i2b2", methods=["POST"])
+# def handle_i2b2_query():
+#     """
+#     Synchronous execution API (legacy)
+#
+#     takes an I2B2 Query Definition in the body and executes it.
+#     :return: the number of matching patients found
+#     """
+#     print("handling query")
+#     # Execute and timestamp
+#     start_time = time.time()
+#     i2b2_request = request.data.decode("UTF-8")
+#     try:
+#         result_set = run(Instruction(i2b2_request, str(uuid4()), time.time_ns()))
+#         response = build_response(result_set)
+#     except RequestException:
+#         return "Connection error with upstream FHIR server", 504
+#
+#     end_time = time.time()
+#     delta = end_time - start_time
+#
+#     # Insert timestamps into result_set
+#     x_start_time = Etree.Element("start_time")
+#     x_start_time.attrib["value"] = str(start_time)
+#
+#     x_end_time = Etree.Element("end_time")
+#     x_end_time.attrib["value"] = str(end_time)
+#
+#     x_delta = Etree.Element("delta")
+#     x_delta.attrib["value"] = str(delta)
+#
+#     response.insert(0, x_end_time)
+#     response.insert(0, x_start_time)
+#     response.insert(0, x_delta)
+#     response = Etree.tostring(response).decode("UTF-8")
+#
+#     return str(response)
 
 
 @app.route("/query", methods=["POST"])
